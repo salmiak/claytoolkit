@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "Konform",
+    "sub": "Mallgenerator för koniska keramikformer. Ange två diametrar och höjden — verktyget vecklar ut manteln till en platt mall (cirkelringssektor) i skala 1:1."
+  },
+  "unit": {
+    "label": "Enhet"
+  },
+  "dims": {
+    "label": "Mått",
+    "dTop": "Övre diameter",
+    "dTopHint": "(öppning/topp)",
+    "dBot": "Undre diameter",
+    "dBotHint": "(bas/botten)",
+    "height": "Höjd",
+    "heightHint": "(lodrätt)"
+  },
+  "shrink": {
+    "label": "Krympmån",
+    "toggle": "Kompensera för krympning",
+    "note": "Måtten tolkas som slutmått. Mallen förstoras ×{factor} (skarvmån räknas som våtmått och skalas ej)."
+  },
+  "seam": {
+    "label": "Skarvmån",
+    "toggle": "Lägg till längs fogen"
+  },
+  "shape": {
+    "label": "Formen du får"
+  },
+  "computed": {
+    "label": "Beräknat",
+    "statusError": "ange positiva mått",
+    "form": "Form",
+    "rect": "rektangel",
+    "slant": "Slänthöjd (mantel)",
+    "angle": "Sektorvinkel",
+    "innerR": "Inre radie Rᵢ",
+    "outerR": "Yttre radie Rₒ",
+    "arcTop": "Båge topp",
+    "arcBot": "Båge botten",
+    "width": "Bredd (omkrets)",
+    "height": "Höjd",
+    "shrinkReadout": "Krympmån (mallmått)"
+  },
+  "actions": {
+    "pdf": "Ladda ner PDF (A4, flera sidor)",
+    "svg": "Ladda ner SVG (1:1)",
+    "print": "Skriv ut mallen",
+    "pdfCreating": "Skapar PDF…"
+  },
+  "canvas": {
+    "empty": "Ange två diametrar och en höjd större än noll så ritas mallen här.",
+    "hint": "Skala 1:1 — kontrollera med {ruler} i mallen efter utskrift. Skriv ut i {pct} (ingen \"anpassa till sida\").",
+    "hintRuler": "10 cm-linjalen",
+    "hintPct": "100 %"
+  },
+  "svg": {
+    "slant": "slänthöjd",
+    "bot": "botten",
+    "top": "topp",
+    "arc": "båge",
+    "angle": "θ",
+    "circ": "omkrets",
+    "cylinder": "rak cylinder (lika diametrar)",
+    "height": "höjd",
+    "control": "10 cm — kontrollskala"
+  },
+  "pdf": {
+    "title": "Konform — mall i skala 1:1",
+    "overview": "Konform — översikt & monteringsordning",
+    "pageTitle": "Konform — sida {page} av {total}",
+    "rowCol": "rad {r}, kolumn {c}",
+    "assemblyTitle": "Så sätter du ihop mallen",
+    "step1": "1. Skriv ut alla {n} mallsidor i 100 % (\"Faktisk storlek\", ingen anpassning).",
+    "step2": "2. Kontrollera med 10 cm-linjalen nedan att skalan stämmer.",
+    "step3": "3. Klipp ut biten på varje sida längs den heldragna linjen.",
+    "step4": "4. Lägg bitarna kant i kant. En streckprickad kant märkt",
+    "step5": "   \"tejp → sida N\" möter samma märkning på sida N.",
+    "step6": "5. Passa in kryssen (+) och tejpa på baksidan.",
+    "tape": "tejp → sida {page}",
+    "legend": "heldragen = klipp   ·   streckprick = tejpfog   ·   + = passmärke",
+    "control": "10 cm — kontrollskala (100 %)",
+    "finalDim": "Slutmått: ø{top} / ø{bot}, höjd {h} {u}",
+    "shrinkNote": "Krympmån: {p} % → mall ×{k}",
+    "noShrink": "Krympmån: ingen",
+    "seamNote": "Skarvmån: {w} {u} längs fogen",
+    "noSeam": "Skarvmån: ingen",
+    "slant": "Slänthöjd: {l} {u}",
+    "angleNote": ", vinkel {deg}°",
+    "size": "Mallstorlek: {w} × {h} {u}  ({n} A4-sidor)",
+    "overview_label": "Översikt",
+    "pageLabel": "sida {page}/{total}"
+  },
+  "schematic": {
+    "top": "øtopp {v}",
+    "bot": "øbotten {v}",
+    "height": "höjd {v}"
+  }
+}

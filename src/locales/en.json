@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "Konform",
+    "sub": "Template generator for conical ceramic forms. Enter two diameters and the height — the tool unrolls the lateral surface into a flat pattern (annular sector) at 1:1 scale."
+  },
+  "unit": {
+    "label": "Unit"
+  },
+  "dims": {
+    "label": "Dimensions",
+    "dTop": "Top diameter",
+    "dTopHint": "(opening/top)",
+    "dBot": "Bottom diameter",
+    "dBotHint": "(base/bottom)",
+    "height": "Height",
+    "heightHint": "(vertical)"
+  },
+  "shrink": {
+    "label": "Shrinkage",
+    "toggle": "Compensate for shrinkage",
+    "note": "Dimensions are interpreted as fired size. The template is scaled ×{factor} (seam allowance is treated as wet size and not scaled)."
+  },
+  "seam": {
+    "label": "Seam allowance",
+    "toggle": "Add along the seam"
+  },
+  "shape": {
+    "label": "Your shape"
+  },
+  "computed": {
+    "label": "Calculated",
+    "statusError": "enter positive dimensions",
+    "form": "Form",
+    "rect": "rectangle",
+    "slant": "Slant height (lateral)",
+    "angle": "Sector angle",
+    "innerR": "Inner radius Rᵢ",
+    "outerR": "Outer radius Rₒ",
+    "arcTop": "Arc top",
+    "arcBot": "Arc bottom",
+    "width": "Width (circumference)",
+    "height": "Height",
+    "shrinkReadout": "Shrinkage (template size)"
+  },
+  "actions": {
+    "pdf": "Download PDF (A4, multi-page)",
+    "svg": "Download SVG (1:1)",
+    "print": "Print template",
+    "pdfCreating": "Generating PDF…"
+  },
+  "canvas": {
+    "empty": "Enter two diameters and a height greater than zero to draw the template.",
+    "hint": "Scale 1:1 — verify with the {ruler} in the template after printing. Print at {pct} (no \"fit to page\").",
+    "hintRuler": "10 cm ruler",
+    "hintPct": "100%"
+  },
+  "svg": {
+    "slant": "slant height",
+    "bot": "bottom",
+    "top": "top",
+    "arc": "arc",
+    "angle": "θ",
+    "circ": "circumference",
+    "cylinder": "straight cylinder (equal diameters)",
+    "height": "height",
+    "control": "10 cm — check scale"
+  },
+  "pdf": {
+    "title": "Konform — template 1:1 scale",
+    "overview": "Konform — overview & assembly",
+    "pageTitle": "Konform — page {page} of {total}",
+    "rowCol": "row {r}, column {c}",
+    "assemblyTitle": "How to assemble the template",
+    "step1": "1. Print all {n} template pages at 100% (\"Actual size\", no scaling).",
+    "step2": "2. Verify scale with the 10 cm ruler below.",
+    "step3": "3. Cut out each page along the solid line.",
+    "step4": "4. Lay the pieces edge to edge. A dashed edge marked",
+    "step5": "   \"tape → page N\" matches the same mark on page N.",
+    "step6": "5. Align the crosses (+) and tape on the back.",
+    "tape": "tape → page {page}",
+    "legend": "solid = cut   ·   dash-dot = tape seam   ·   + = registration mark",
+    "control": "10 cm — check scale (100%)",
+    "finalDim": "Fired size: ø{top} / ø{bot}, height {h} {u}",
+    "shrinkNote": "Shrinkage: {p}% → template ×{k}",
+    "noShrink": "No shrinkage",
+    "seamNote": "Seam allowance: {w} {u} along seam",
+    "noSeam": "No seam allowance",
+    "slant": "Slant height: {l} {u}",
+    "angleNote": ", angle {deg}°",
+    "size": "Template size: {w} × {h} {u}  ({n} A4 pages)",
+    "overview_label": "Overview",
+    "pageLabel": "page {page}/{total}"
+  },
+  "schematic": {
+    "top": "øtop {v}",
+    "bot": "øbottom {v}",
+    "height": "height {v}"
+  }
+}

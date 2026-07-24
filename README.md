@@ -2,7 +2,7 @@
 
 Verktyg för keramikarbete. / Tools for working with clay.
 
-**Live:** https://salmiak.github.io/claytoolkit/
+**Live:** https://claytoolkit.com
 
 ## Konform
 

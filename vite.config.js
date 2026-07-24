@@ -3,7 +3,6 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/claytoolkit/',
   server: {
     port: process.env.PORT ? Number(process.env.PORT) : 5173,
   },

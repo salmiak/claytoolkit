@@ -1,3 +1,5 @@
+import { discList, DISC_GAP } from './useGeometry.js'
+
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
 
@@ -14,28 +16,57 @@ function contentSize(o) {
   return { o, pw, ph, ox: MARGIN, oy: MARGIN + HEADER, cw: pw - 2 * MARGIN, ch: ph - 2 * MARGIN - HEADER - FOOTER }
 }
 
+// Circle as a polygon, segmented finely enough that the tiling and clipping
+// code can treat it like any other cut outline.
+function circlePoly(cx, cy, r) {
+  const seg = Math.max(48, Math.ceil(TAU * r / 0.8))
+  const pts = []
+  for (let i = 0; i < seg; i++) {
+    const a = TAU * i / seg
+    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) })
+  }
+  return pts
+}
+
+// Returns every closed cut outline: the unrolled wall first, then any discs
+// laid out in a row beneath it.
 function cutPolygon(g) {
+  const polys = []
+  const seams = []
+
   if (g.cyl) {
     const { W, H, seam } = g
-    const poly = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }]
-    const seams = seam > 0 ? [[{ x: -seam, y: 0 }, { x: 0, y: 0 }, { x: 0, y: H }, { x: -seam, y: H }]] : []
-    return { poly, seams }
+    polys.push([{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }])
+    if (seam > 0) seams.push([{ x: -seam, y: 0 }, { x: 0, y: 0 }, { x: 0, y: H }, { x: -seam, y: H }])
+  } else {
+    const { Ro, Ri, theta, seam } = g, ht = theta / 2, C = { x: 0, y: 0 }
+    const segO = Math.max(24, Math.ceil(theta * Ro / 0.8))
+    const segI = Math.max(24, Math.ceil(theta * Ri / 0.8))
+    const poly = []
+    for (let i = 0; i <= segO; i++) poly.push(P(C.x, C.y, Ro, -ht + theta * i / segO))
+    for (let i = 0; i <= segI; i++) poly.push(P(C.x, C.y, Ri, ht - theta * i / segI))
+    polys.push(poly)
+    if (seam > 0) {
+      const nl = { x: -Math.cos(ht), y: -Math.sin(ht) }, nr = { x: Math.cos(ht), y: -Math.sin(ht) }
+      const Pol = P(C.x, C.y, Ro, -ht), Pil = P(C.x, C.y, Ri, -ht)
+      const Por = P(C.x, C.y, Ro, ht), Pir = P(C.x, C.y, Ri, ht)
+      seams.push([Pol, Pil, { x: Pil.x + seam * nl.x, y: Pil.y + seam * nl.y }, { x: Pol.x + seam * nl.x, y: Pol.y + seam * nl.y }])
+      seams.push([Por, Pir, { x: Pir.x + seam * nr.x, y: Pir.y + seam * nr.y }, { x: Por.x + seam * nr.x, y: Por.y + seam * nr.y }])
+    }
   }
-  const { Ro, Ri, theta, seam } = g, ht = theta / 2, C = { x: 0, y: 0 }
-  const segO = Math.max(24, Math.ceil(theta * Ro / 0.8))
-  const segI = Math.max(24, Math.ceil(theta * Ri / 0.8))
-  const poly = []
-  for (let i = 0; i <= segO; i++) poly.push(P(C.x, C.y, Ro, -ht + theta * i / segO))
-  for (let i = 0; i <= segI; i++) poly.push(P(C.x, C.y, Ri, ht - theta * i / segI))
-  let seams = []
-  if (seam > 0) {
-    const nl = { x: -Math.cos(ht), y: -Math.sin(ht) }, nr = { x: Math.cos(ht), y: -Math.sin(ht) }
-    const Pol = P(C.x, C.y, Ro, -ht), Pil = P(C.x, C.y, Ri, -ht)
-    const Por = P(C.x, C.y, Ro, ht), Pir = P(C.x, C.y, Ri, ht)
-    seams.push([Pol, Pil, { x: Pil.x + seam * nl.x, y: Pil.y + seam * nl.y }, { x: Pol.x + seam * nl.x, y: Pol.y + seam * nl.y }])
-    seams.push([Por, Pir, { x: Pir.x + seam * nr.x, y: Pir.y + seam * nr.y }, { x: Por.x + seam * nr.x, y: Por.y + seam * nr.y }])
+
+  const discs = discList(g)
+  if (discs.length) {
+    const b = bboxOf([...polys, ...seams])
+    const top = b.maxy + DISC_GAP
+    let x = b.minx
+    discs.forEach(d => {
+      polys.push(circlePoly(x + d.r, top + d.r, d.r))
+      x += d.r * 2 + DISC_GAP
+    })
   }
-  return { poly, seams }
+
+  return { polys, seams }
 }
 
 function bboxOf(list) {
@@ -138,8 +169,8 @@ function controlRuler(doc, x, y, labels) {
 export async function generatePDF(g, inputVals, labels) {
   const { jsPDF } = await import('jspdf')
   const { unit, dTop, dBot, h: height } = inputVals
-  const { poly, seams } = cutPolygon(g)
-  const raw = bboxOf([poly, ...seams])
+  const { polys, seams } = cutPolygon(g)
+  const raw = bboxOf([...polys, ...seams])
   const tw = raw.maxx - raw.minx, th = raw.maxy - raw.miny
   const M = 6
   const bmin = { x: raw.minx - M, y: raw.miny - M }
@@ -163,11 +194,11 @@ export async function generatePDF(g, inputVals, labels) {
     for (let c = 0; c < nx; c++) {
       const tL = bmin.x + c * C.cw, tT = bmin.y + r * C.ch
       const rect = { l: tL, t: tT, r: tL + C.cw, b: tT + C.ch }
-      const cp = clipPoly(poly, rect)
+      const cps = polys.map(p => clipPoly(p, rect)).filter(p => p.length >= 3)
       const sp = seams.map(s => clipPoly(s, rect)).filter(s => s.length >= 3)
-      if (cp.length >= 3 || sp.length) {
+      if (cps.length || sp.length) {
         num++; pageOf[`${r}_${c}`] = num
-        tiles.push({ r, c, tL, tT, rect, cp, sp })
+        tiles.push({ r, c, tL, tT, rect, cps, sp })
       }
     }
   }
@@ -181,7 +212,7 @@ export async function generatePDF(g, inputVals, labels) {
     const mp = p => ({ x: mapX + (p.x - bmin.x) * sc, y: mapY + (p.y - bmin.y) * sc })
 
     stroke(doc, INK, 0.4); dset(doc, [])
-    polyline(doc, poly.map(mp), true)
+    polys.forEach(p => polyline(doc, p.map(mp), true))
     seams.forEach(s => { stroke(doc, TEAL, 0.3); dset(doc, [1.2, 1]); polyline(doc, s.map(mp), true); dset(doc, []) })
 
     for (let c = 0; c <= nx; c++) {
@@ -219,6 +250,7 @@ export async function generatePDF(g, inputVals, labels) {
       [labels.finalDim, 9, true],
       [labels.shrinkNote, 9, false],
       [labels.seamNote, 9, false],
+      [labels.discsNote, 9, false],
       [labels.slant, 9, false],
       [labels.getSize(tw, th, N), 9, false],
     ]
@@ -254,8 +286,8 @@ export async function generatePDF(g, inputVals, labels) {
     t.sp.forEach(s => polyline(doc, s.map(map), true))
     dset(doc, [])
 
-    if (t.cp.length >= 3) {
-      const runs = toRuns(t.cp, t.rect)
+    t.cps.forEach(cp => {
+      const runs = toRuns(cp, t.rect)
       stroke(doc, INK, 0.5); dset(doc, [])
       runs.filter(r => !r.c.seam).forEach(r => polyline(doc, r.pts.map(map), false))
       runs.filter(r => r.c.seam).forEach(r => {
@@ -282,7 +314,7 @@ export async function generatePDF(g, inputVals, labels) {
             { align: 'center', baseline: 'middle', angle: vert ? 90 : 0 })
         }
       })
-    }
+    })
 
     controlRuler(doc, C.ox, C.oy + C.ch - 3.5, labels)
     footerLegend(doc, C, multi ? labels.getPageLabel(pageOf[`${t.r}_${t.c}`], N) : '', labels)

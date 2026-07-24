@@ -22,6 +22,8 @@
         v-model:shrinkP="state.shrinkP"
         v-model:seamOn="state.seamOn"
         v-model:seamW="state.seamW"
+        v-model:discTop="state.discTop"
+        v-model:discBot="state.discBot"
         :geo="geo"
         :pdfLoading="pdfLoading"
         @downloadSvg="handleDownloadSvg"
@@ -41,7 +43,7 @@ import { storeLocale } from './locale.js'
 import { useI18n } from 'vue-i18n'
 import ControlPanel from './components/ControlPanel.vue'
 import TemplateCanvas from './components/TemplateCanvas.vue'
-import { calcGeometry, buildTemplate, svgString, fmt } from './composables/useGeometry.js'
+import { calcGeometry, buildTemplate, svgString, fmt, discList } from './composables/useGeometry.js'
 import { generatePDF } from './composables/usePDF.js'
 
 const { t, locale } = useI18n()
@@ -59,6 +61,8 @@ const state = reactive({
   shrinkP: 12,
   seamOn: false,
   seamW: 10,
+  discTop: false,
+  discBot: false,
 })
 
 watch(() => state.unit, (newUnit, oldUnit) => {
@@ -99,8 +103,10 @@ function handleDownloadSvg() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   const sfx = state.shrinkOn ? `_krymp${state.shrinkP}pct` : ''
+  const discSfx = discList(geo.value).map(d => d.key).join('') || ''
   a.href = url
-  a.download = `konform_${state.dTop}-${state.dBot}-${state.h}${state.unit}${sfx}.svg`
+  a.download = `konform_${state.dTop}-${state.dBot}-${state.h}${state.unit}${sfx}` +
+               `${discSfx ? '_' + discSfx : ''}.svg`
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
 }
 
@@ -145,6 +151,14 @@ async function handleDownloadPdf() {
     seamNote:       g.seam > 0
                       ? t('pdf.seamNote', { w: fmt(g.seam, u), u })
                       : t('pdf.noSeam'),
+    discsNote:      (() => {
+                      const d = discList(g)
+                      if (!d.length) return t('pdf.noDiscs')
+                      const list = d
+                        .map(x => `${t(x.key === 'bot' ? 'svg.bot' : 'svg.top')} ⌀${fmt(x.r * 2, u)} ${u}`)
+                        .join(' + ')
+                      return t('pdf.discs', { list })
+                    })(),
     slant:          t('pdf.slant', { l: fmt(g.metrics.L, u), u }) +
                       (!g.cyl ? t('pdf.angleNote', { deg: g.metrics.thetaDeg.toFixed(1) }) : ''),
     getSize:        (tw, th, n) => t('pdf.size', { w: fmt(tw, u), h: fmt(th, u), u, n }),

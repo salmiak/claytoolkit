@@ -75,6 +75,26 @@
       </div>
     </div>
 
+    <!-- Discs (base / lid) -->
+    <div class="mb-[22px]">
+      <div class="group-lbl">{{ t('discs.label') }}</div>
+      <div class="flex items-center gap-2.5 mt-0.5">
+        <input id="discBot" type="checkbox" v-model="discBot" class="w-[17px] h-[17px] accent-teal shrink-0" />
+        <label for="discBot" class="text-[13px] text-[#d8d4ca] flex-1">
+          {{ t('discs.bot') }} <small class="text-[#8f8a7e]">⌀{{ dBot || 0 }} {{ unit }}</small>
+        </label>
+      </div>
+      <div class="flex items-center gap-2.5 mt-2">
+        <input id="discTop" type="checkbox" v-model="discTop" class="w-[17px] h-[17px] accent-teal shrink-0" />
+        <label for="discTop" class="text-[13px] text-[#d8d4ca] flex-1">
+          {{ t('discs.top') }} <small class="text-[#8f8a7e]">⌀{{ dTop || 0 }} {{ unit }}</small>
+        </label>
+      </div>
+      <p v-if="discBot || discTop" class="text-[12px] text-[#9c968a] mt-2.5 leading-[1.45]">
+        {{ t('discs.note') }}
+      </p>
+    </div>
+
     <!-- Schematic -->
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('shape.label') }}</div>
@@ -133,6 +153,8 @@ const shrinkOn = defineModel('shrinkOn')
 const shrinkP  = defineModel('shrinkP')
 const seamOn   = defineModel('seamOn')
 const seamW    = defineModel('seamW')
+const discTop  = defineModel('discTop')
+const discBot  = defineModel('discBot')
 
 const props = defineProps({
   geo:        { type: Object,  required: true },

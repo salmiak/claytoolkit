@@ -24,6 +24,12 @@
     "label": "Seam allowance",
     "toggle": "Add along the seam"
   },
+  "discs": {
+    "label": "Base & lid",
+    "bot": "Bottom disc",
+    "top": "Top disc",
+    "note": "Discs are drawn at the given diameter, with no seam allowance."
+  },
   "shape": {
     "label": "Your shape"
   },
@@ -85,6 +91,8 @@
     "noShrink": "No shrinkage",
     "seamNote": "Seam allowance: {w} {u} along seam",
     "noSeam": "No seam allowance",
+    "discs": "Discs: {list}",
+    "noDiscs": "Discs: none",
     "slant": "Slant height: {l} {u}",
     "angleNote": ", angle {deg}°",
     "size": "Template size: {w} × {h} {u}  ({n} A4 pages)",

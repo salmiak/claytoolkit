@@ -24,6 +24,12 @@
     "label": "Skarvmån",
     "toggle": "Lägg till längs fogen"
   },
+  "discs": {
+    "label": "Botten & lock",
+    "bot": "Bottenskiva",
+    "top": "Toppskiva",
+    "note": "Skivorna ritas i angiven diameter, utan skarvmån."
+  },
   "shape": {
     "label": "Formen du får"
   },
@@ -85,6 +91,8 @@
     "noShrink": "Krympmån: ingen",
     "seamNote": "Skarvmån: {w} {u} längs fogen",
     "noSeam": "Skarvmån: ingen",
+    "discs": "Skivor: {list}",
+    "noDiscs": "Skivor: inga",
     "slant": "Slänthöjd: {l} {u}",
     "angleNote": ", vinkel {deg}°",
     "size": "Mallstorlek: {w} × {h} {u}  ({n} A4-sidor)",

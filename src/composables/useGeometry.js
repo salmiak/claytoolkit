@@ -25,6 +25,26 @@ function heightDim(x, y, H, unit, labels) {
   )
 }
 
+// Lay the discs out in a row under the unrolled wall. Reads bb.maxy once up
+// front, so tracking each disc afterwards cannot shift the row downward.
+function drawDiscs(g, bb, track, unit, labels) {
+  const list = discList(g)
+  if (!list.length) return ''
+  const top = bb.maxy + 12
+  let x = bb.minx
+  let s = ''
+  list.forEach(d => {
+    const cx = x + d.r, cy = top + d.r
+    s += `<circle class="cut-fill" cx="${n(cx)}" cy="${n(cy)}" r="${n(d.r)}"/>`
+    s += `<text class="lbl-txt" x="${n(cx)}" y="${n(cy)}" text-anchor="middle">` +
+         `${d.key === 'bot' ? labels.bot : labels.top} ⌀${fmt(d.r * 2, unit)} ${unit}</text>`
+    track({ x, y: top })
+    track({ x: x + d.r * 2, y: top + d.r * 2 })
+    x += d.r * 2 + DISC_GAP
+  })
+  return s
+}
+
 function ruler(bb, x0, labels) {
   const y = bb.maxy + 9
   const x = x0 === Infinity ? 0 : x0
@@ -46,7 +66,7 @@ function finalize(inner, bb, pad) {
   return { inner, vb: `${n(x)} ${n(y)} ${n(w)} ${n(h)}`, w: n(w), h: n(h) }
 }
 
-export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW }) {
+export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot }) {
   const f = unit === 'cm' ? 10 : 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
@@ -62,10 +82,14 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   const dR = Rbig - Rsmall
   const L = Math.hypot(h, dR)
 
+  // Discs are cut at the given diameter, shrink-scaled like the wall but with no
+  // seam allowance — a disc has no vertical joint to overlap.
+  const discs = { top: !!discTop, bot: !!discBot }
+
   if (dR < 1e-6) {
     const W = TAU * Rbig
     return {
-      ok: true, cyl: true, W, H: h, seam, shrink: { p: sp, k },
+      ok: true, cyl: true, W, H: h, seam, rTop, rBot, discs, shrink: { p: sp, k },
       metrics: {
         L: h, Ri: null, Ro: null, thetaDeg: null,
         arcTop: TAU * rTop, arcBot: TAU * rBot,
@@ -78,13 +102,25 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   const Ri = Rsmall * L / dR
   const theta = TAU * dR / L
   return {
-    ok: true, cyl: false, Ro, Ri, theta, seam, rTop, rBot, Rbig, Rsmall, shrink: { p: sp, k },
+    ok: true, cyl: false, Ro, Ri, theta, seam, rTop, rBot, Rbig, Rsmall, discs, shrink: { p: sp, k },
     metrics: {
       L, Ri, Ro, thetaDeg: theta * 180 / Math.PI,
       arcTop: TAU * rTop, arcBot: TAU * rBot,
     },
   }
 }
+
+// Discs to include, largest first so the row below the wall packs tightly.
+// Shared by the SVG and PDF paths so both cut the same set.
+export function discList(g) {
+  if (!g.ok || !g.discs) return []
+  const out = []
+  if (g.discs.bot && g.rBot > 0) out.push({ key: 'bot', r: g.rBot })
+  if (g.discs.top && g.rTop > 0) out.push({ key: 'top', r: g.rTop })
+  return out.sort((a, b) => b.r - a.r)
+}
+
+export const DISC_GAP = 8
 
 export function buildTemplate(g, unit, labels) {
   if (!g.ok) return null
@@ -104,6 +140,7 @@ export function buildTemplate(g, unit, labels) {
     inner += `<text class="lbl-txt" x="${n(W / 2)}" y="${n(H + 7)}" text-anchor="middle">${labels.circ} ${fmt(W, unit)} ${unit}</text>`
     inner += `<text class="lbl-sub" x="${n(W / 2)}" y="-4" text-anchor="middle">${labels.cylinder}</text>`
     inner += heightDim(-4, 0, H, unit, labels)
+    inner += drawDiscs(g, bb, track, unit, labels)
     inner += ruler(bb, 0, labels)
     return finalize(inner, bb, pad)
   }
@@ -151,6 +188,7 @@ export function buildTemplate(g, unit, labels) {
   inner += `<text class="lbl-sub" x="${n(bIn.x)}" y="${n(bIn.y - 3)}" text-anchor="middle">${labels.top} ⌀${fmt(g.metrics.arcTop / Math.PI, unit)} · ${labels.arc} ${fmt(g.metrics.arcTop, unit)} ${unit}</text>`
   inner += `<text class="dim-txt" x="${n(Pol.x - 2)}" y="${n(Pol.y - 3)}" text-anchor="end">${labels.angle} ${g.metrics.thetaDeg.toFixed(1)}°</text>`
 
+  inner += drawDiscs(g, bb, track, unit, labels)
   inner += ruler(bb, bb.minx, labels)
   return finalize(inner, bb, pad)
 }

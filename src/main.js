@@ -4,14 +4,12 @@ import App from './App.vue'
 import './style.css'
 import sv from './locales/sv.json'
 import en from './locales/en.json'
-
-const savedLocale = localStorage.getItem('konform-locale')
-const browserLocale = navigator.language.startsWith('sv') ? 'sv' : 'en'
+import { FALLBACK, readStoredLocale, detectLocale } from './locale.js'
 
 const i18n = createI18n({
   legacy: false,
-  locale: savedLocale || browserLocale,
-  fallbackLocale: 'en',
+  locale: readStoredLocale() || detectLocale(),
+  fallbackLocale: FALLBACK,
   messages: { sv, en },
 })
 

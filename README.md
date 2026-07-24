@@ -33,6 +33,14 @@ Deploy sker automatiskt till GitHub Pages vid push till `main`.
 
 1. Kopiera `src/locales/sv.json` till `src/locales/<kod>.json` och översätt värdena.
 2. Importera och registrera filen i `messages` i [src/main.js](src/main.js).
+3. Lägg till språkkoden i `SUPPORTED` i [src/locale.js](src/locale.js), annars
+   plockas den inte upp av språkdetekteringen.
 
 Alla strängar — inklusive texten som ritas in i SVG:en och PDF:en — går via i18n,
 så inget behöver ändras i geometrikoden.
+
+## Språkval
+
+Språket väljs efter klientens systemspråk: svenska om `sv` ligger före `en` i
+webbläsarens språklista, annars engelska. Väljer besökaren språk manuellt sparas
+det i `localStorage` och tar över från och med nästa besök.

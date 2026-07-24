@@ -37,6 +37,7 @@
 
 <script setup>
 import { reactive, computed, ref, watch } from 'vue'
+import { storeLocale } from './locale.js'
 import { useI18n } from 'vue-i18n'
 import ControlPanel from './components/ControlPanel.vue'
 import TemplateCanvas from './components/TemplateCanvas.vue'
@@ -44,6 +45,10 @@ import { calcGeometry, buildTemplate, svgString, fmt } from './composables/useGe
 import { generatePDF } from './composables/usePDF.js'
 
 const { t, locale } = useI18n()
+
+// Keep <html lang> in step with the active locale, for screen readers,
+// hyphenation and translation prompts.
+watch(locale, l => { document.documentElement.lang = l }, { immediate: true })
 
 const state = reactive({
   unit: 'mm',
@@ -156,7 +161,7 @@ async function handleDownloadPdf() {
 
 function toggleLocale() {
   locale.value = locale.value === 'sv' ? 'en' : 'sv'
-  localStorage.setItem('konform-locale', locale.value)
+  storeLocale(locale.value)
 }
 </script>
 

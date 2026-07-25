@@ -42,12 +42,19 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { fmt } from '../composables/useGeometry.js'
 
-// Banana silhouette (SVG Repo, emojione-monotone). Measured from the artwork:
-// its two tips lie 66.37 path units apart, which the user gives as ~18 cm, so
-// one unit is 2.712 mm. Everything here is drawn from that one conversion.
+// Banana silhouette (SVG Repo, emojione-monotone). Scaled from the artwork's
+// length ALONG ITS CURVE, which is how banana length is normally quoted, rather
+// than the straight tip-to-tip span — this drawing is curved enough that the two
+// differ by a fifth, and tip-to-tip made it read oversized.
+//
+// Measured from the outline: the tips lie 66.37 units apart, and the centreline
+// bulges 19.89 units off that chord, which fits an arc of 81.28 units. At ~18 cm
+// that puts one unit at 2.215 mm, implying tips ~147 mm apart — about right for
+// a real banana. Everything here derives from that single conversion.
 const BANANA_D = 'M53.943 35.448c6.394-12.03 6.377-22.327 3.456-27.264C56.184 6.131 54.461 5 52.548 5c-.188 0-.379.011-.567.034c-3.137.376-4.355 3.938-6.043 8.867c-1.195 3.491-2.679 7.783-5.124 12.001c-1.357-1.775-3.068-3.262-4.911-4.138l.018-.01c-.058-.023-.111-.039-.169-.063a9.344 9.344 0 0 0-1.537-.564c-.178-.045-.352-.08-.526-.117c-13.103-3.456-17.258 13.266-10.228 11.16c2.048-.614 3.431-3.963 7.608-7.329c3.143 1.908 5.211 5.305 4.493 7.787c-2.387 8.254-9.596 12.007-17.848 12.007c-1.859 0-3.771-.19-5.692-.563a22.38 22.38 0 0 1-2.223-.563a24.21 24.21 0 0 1-4.345-1.776L2 44.684a29.073 29.073 0 0 0 2.878 3.801c3.841 4.305 8.941 7.406 14.845 8.551c9.261 1.795 18.278-1.621 24.4-8.291c3.388-4.271 6.648-6.051 9.438-6.588C53.021 49.418 47.438 59 51.193 59c.143 0 .301-.015.472-.043c6.652-1.111 10.548-9.469 10.326-14.765c-.237-5.677-4.655-7.884-8.048-8.744'
 const BB = { x: 2, y: 5, w: 60, h: 54 }
-const MM_PER_UNIT = 180 / 66.37
+const BANANA_ARC_UNITS = 81.28
+const MM_PER_UNIT = 180 / BANANA_ARC_UNITS
 const BANANA_MM = { w: BB.w * MM_PER_UNIT, h: BB.h * MM_PER_UNIT }
 
 const PAD = 14

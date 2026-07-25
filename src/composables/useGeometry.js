@@ -194,15 +194,15 @@ export function buildTemplate(g, unit, labels) {
 }
 
 export const SVG_STYLE = `
-  .cut{fill:none;stroke:#23221F;stroke-width:.5}
-  .cut-fill{fill:#ffffff;fill-opacity:.55;stroke:#23221F;stroke-width:.5}
-  .seam{fill:#2F6F73;fill-opacity:.10;stroke:#2F6F73;stroke-width:.4;stroke-dasharray:2.4 1.8}
-  .dim{stroke:#2F6F73;stroke-width:.3}
-  .dim-txt{fill:#2F6F73;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}
-  .lbl-txt{fill:#23221F;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}
-  .lbl-sub{fill:#6B665C;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3.4px}
-  .ruler{stroke:#23221F;stroke-width:.35}
-  .ruler-txt{fill:#23221F;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3.6px}`
+  .cut{fill:none;stroke:#241F1C;stroke-width:.5}
+  .cut-fill{fill:#ffffff;fill-opacity:.55;stroke:#241F1C;stroke-width:.5}
+  .seam{fill:#7C9473;fill-opacity:.10;stroke:#7C9473;stroke-width:.4;stroke-dasharray:2.4 1.8}
+  .dim{stroke:#7C9473;stroke-width:.3}
+  .dim-txt{fill:#5A6E52;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}
+  .lbl-txt{fill:#241F1C;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}
+  .lbl-sub{fill:#6B4A36;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3.4px}
+  .ruler{stroke:#241F1C;stroke-width:.35}
+  .ruler-txt{fill:#241F1C;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3.6px}`
 
 export function svgString(t, physical) {
   const size = physical ? `width="${t.w}mm" height="${t.h}mm"` : `width="100%"`

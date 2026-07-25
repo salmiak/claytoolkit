@@ -2,12 +2,12 @@
   <div class="flex flex-col min-h-screen md:h-screen md:overflow-hidden bg-frame text-ink antialiased">
 
     <header class="bg-frame border-b border-black px-5 py-2.5 flex items-center gap-4">
-      <h1 class="text-[19px] font-[650] tracking-[-0.01em] text-[#EDEAE1] m-0 leading-none">
-        <span class="text-teal font-mono font-normal mr-2">◠</span>{{ t('app.name') }}
+      <h1 class="text-[19px] font-[650] tracking-[-0.01em] text-clay-bisque m-0 leading-none">
+        <span class="text-sage font-mono font-normal mr-2">◠</span>{{ t('app.name') }}
       </h1>
       <button
         @click="toggleLocale"
-        class="ml-auto text-[12px] font-mono text-[#9c968a] hover:text-[#EDEAE1] border border-[#4a4842] rounded-md px-2.5 py-0.5 transition-colors shrink-0"
+        class="ml-auto text-[12px] font-mono text-clay-terracotta hover:text-clay-bisque border border-frame-line rounded-md px-2.5 py-0.5 transition-colors shrink-0"
       >{{ locale === 'sv' ? 'EN' : 'SV' }}</button>
     </header>
 

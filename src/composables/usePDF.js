@@ -9,7 +9,13 @@ function P(cx, cy, rho, phi) {
 
 const A4 = { w: 210, h: 297 }
 const MARGIN = 8, HEADER = 13, FOOTER = 9
-const INK = [35, 34, 31], TEAL = [47, 111, 115], GRAY = [165, 160, 150], SOFT = [120, 116, 108]
+// Clay-firing palette, as PDF RGB. SAGE draws lines; SAGE_TXT is the darker
+// accent for type, since sage on white is only 3.3:1.
+const INK = [36, 31, 28]        // #241F1C
+const SAGE = [124, 148, 115]    // #7C9473
+const SAGE_TXT = [90, 110, 82]  // #5A6E52
+const RULE = [185, 141, 99]     // #B98D63 — faint frames and grid
+const SOFT = [107, 74, 54]      // #6B4A36 — secondary type
 
 function contentSize(o) {
   const pw = o === 'l' ? A4.h : A4.w, ph = o === 'l' ? A4.w : A4.h
@@ -145,7 +151,7 @@ function pdfHeader(doc, C, title, sub) {
     doc.setFont('helvetica', 'normal'); doc.setTextColor(...SOFT); doc.setFontSize(8.5)
     doc.text(sub, C.pw - MARGIN, MARGIN + 5, { align: 'right' })
   }
-  stroke(doc, GRAY, 0.2); dset(doc, [])
+  stroke(doc, RULE, 0.2); dset(doc, [])
   doc.line(MARGIN, MARGIN + 7.5, C.pw - MARGIN, MARGIN + 7.5)
 }
 
@@ -213,12 +219,12 @@ export async function generatePDF(g, inputVals, labels) {
 
     stroke(doc, INK, 0.4); dset(doc, [])
     polys.forEach(p => polyline(doc, p.map(mp), true))
-    seams.forEach(s => { stroke(doc, TEAL, 0.3); dset(doc, [1.2, 1]); polyline(doc, s.map(mp), true); dset(doc, []) })
+    seams.forEach(s => { stroke(doc, SAGE, 0.3); dset(doc, [1.2, 1]); polyline(doc, s.map(mp), true); dset(doc, []) })
 
     for (let c = 0; c <= nx; c++) {
       const x = bmin.x + c * C.cw
       const a = mp({ x, y: bmin.y }), b = mp({ x, y: bmin.y + H })
-      stroke(doc, GRAY, 0.2); dset(doc, [0.8, 0.8]); doc.line(a.x, a.y, b.x, b.y)
+      stroke(doc, RULE, 0.2); dset(doc, [0.8, 0.8]); doc.line(a.x, a.y, b.x, b.y)
     }
     for (let r = 0; r <= ny; r++) {
       const y = bmin.y + r * C.ch
@@ -227,7 +233,7 @@ export async function generatePDF(g, inputVals, labels) {
     }
     dset(doc, [])
 
-    doc.setTextColor(...TEAL)
+    doc.setTextColor(...SAGE_TXT)
     tiles.forEach(t => {
       const cx = bmin.x + (t.c + 0.5) * C.cw, cy = bmin.y + (t.r + 0.5) * C.ch
       const m = mp({ x: cx, y: cy })
@@ -278,11 +284,11 @@ export async function generatePDF(g, inputVals, labels) {
     }
     const map = p => ({ x: C.ox + (p.x - t.tL) + offx, y: C.oy + (p.y - t.tT) + offy })
 
-    stroke(doc, GRAY, 0.15); dset(doc, [0.6, 0.9])
+    stroke(doc, RULE, 0.15); dset(doc, [0.6, 0.9])
     doc.rect(C.ox, C.oy, C.cw, C.ch)
     dset(doc, [])
 
-    stroke(doc, TEAL, 0.35); dset(doc, [1.6, 1.2])
+    stroke(doc, SAGE, 0.35); dset(doc, [1.6, 1.2])
     t.sp.forEach(s => polyline(doc, s.map(map), true))
     dset(doc, [])
 
@@ -296,17 +302,17 @@ export async function generatePDF(g, inputVals, labels) {
           : r.c.side === 'T' ? [t.r - 1, t.c]
           : [t.r + 1, t.c]
         const pg = pageOf[`${nb[0]}_${nb[1]}`]
-        stroke(doc, TEAL, 0.55); dset(doc, [3, 1.3, 0.6, 1.3])
+        stroke(doc, SAGE, 0.55); dset(doc, [3, 1.3, 0.6, 1.3])
         polyline(doc, r.pts.map(map), false)
         dset(doc, [])
         const a = r.pts[0], b = r.pts[r.pts.length - 1]
         ;[0, 0.25, 0.5, 0.75, 1].forEach(f => {
           const m = map({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f })
-          stroke(doc, TEAL, 0.4); cross(doc, m.x, m.y, 1.6)
+          stroke(doc, SAGE, 0.4); cross(doc, m.x, m.y, 1.6)
         })
         if (pg) {
           const mid = map({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 })
-          doc.setTextColor(...TEAL); doc.setFontSize(8)
+          doc.setTextColor(...SAGE_TXT); doc.setFontSize(8)
           const vert = r.c.side === 'L' || r.c.side === 'R'
           const dx = r.c.side === 'L' ? 4 : r.c.side === 'R' ? -4 : 0
           const dy = r.c.side === 'T' ? 4 : r.c.side === 'B' ? -4 : 0

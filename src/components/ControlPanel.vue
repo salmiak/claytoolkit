@@ -1,15 +1,15 @@
 <template>
-  <section class="bg-frame-2 text-[#E7E3DA] px-5 pt-5 pb-7 md:overflow-y-auto border-b border-black md:border-b-0 md:border-r">
+  <section class="bg-frame-2 text-clay-sand px-5 pt-5 pb-7 md:overflow-y-auto border-b border-black md:border-b-0 md:border-r">
 
     <!-- Unit toggle -->
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('unit.label') }}</div>
-      <div class="flex border border-[#4a4842] rounded-[7px] overflow-hidden w-max">
+      <div class="flex border border-frame-line rounded-[7px] overflow-hidden w-max">
         <button
           v-for="u in ['mm','cm']"
           :key="u"
           @click="unit = u"
-          :class="['font-mono text-[13px] px-4 py-1.5 transition-colors', unit === u ? 'bg-teal text-white' : 'bg-transparent text-line hover:text-white']"
+          :class="['font-mono text-[13px] px-4 py-1.5 transition-colors', unit === u ? 'bg-sage text-ink' : 'bg-transparent text-clay-terracotta hover:text-clay-bisque']"
         >{{ u }}</button>
       </div>
     </div>
@@ -18,8 +18,8 @@
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('dims.label') }}</div>
       <div v-for="field in dimFields" :key="field.key" class="mb-[14px]">
-        <label :for="field.key" class="block text-[13px] mb-[5px] text-[#d8d4ca]">
-          {{ field.label }} <small class="text-[#8f8a7e]">{{ field.hint }}</small>
+        <label :for="field.key" class="block text-[13px] mb-[5px] text-clay-sand">
+          {{ field.label }} <small class="text-clay-terracotta">{{ field.hint }}</small>
         </label>
         <div class="relative flex items-center">
           <input
@@ -38,8 +38,8 @@
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('shrink.label') }}</div>
       <div class="flex items-center gap-2.5 mt-0.5">
-        <input id="shrinkOn" type="checkbox" v-model="shrinkOn" class="w-[17px] h-[17px] accent-teal shrink-0" />
-        <label for="shrinkOn" class="text-[13px] text-[#d8d4ca] flex-1">{{ t('shrink.toggle') }}</label>
+        <input id="shrinkOn" type="checkbox" v-model="shrinkOn" class="w-[17px] h-[17px] accent-sage shrink-0" />
+        <label for="shrinkOn" class="text-[13px] text-clay-sand flex-1">{{ t('shrink.toggle') }}</label>
         <div class="relative w-24">
           <input
             type="number" min="0" max="30" step="0.5"
@@ -51,7 +51,7 @@
           <span class="field-unit">%</span>
         </div>
       </div>
-      <p v-if="shrinkOn && shrinkFactor" class="text-[12px] text-[#9c968a] mt-2.5 leading-[1.45]">
+      <p v-if="shrinkOn && shrinkFactor" class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
         {{ t('shrink.note', { factor: shrinkFactor }) }}
       </p>
     </div>
@@ -60,8 +60,8 @@
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('seam.label') }}</div>
       <div class="flex items-center gap-2.5 mt-0.5">
-        <input id="seamOn" type="checkbox" v-model="seamOn" class="w-[17px] h-[17px] accent-teal shrink-0" />
-        <label for="seamOn" class="text-[13px] text-[#d8d4ca] flex-1">{{ t('seam.toggle') }}</label>
+        <input id="seamOn" type="checkbox" v-model="seamOn" class="w-[17px] h-[17px] accent-sage shrink-0" />
+        <label for="seamOn" class="text-[13px] text-clay-sand flex-1">{{ t('seam.toggle') }}</label>
         <div class="relative w-24">
           <input
             type="number" min="0" step="1"
@@ -79,18 +79,18 @@
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('discs.label') }}</div>
       <div class="flex items-center gap-2.5 mt-0.5">
-        <input id="discBot" type="checkbox" v-model="discBot" class="w-[17px] h-[17px] accent-teal shrink-0" />
-        <label for="discBot" class="text-[13px] text-[#d8d4ca] flex-1">
-          {{ t('discs.bot') }} <small class="text-[#8f8a7e]">⌀{{ dBot || 0 }} {{ unit }}</small>
+        <input id="discBot" type="checkbox" v-model="discBot" class="w-[17px] h-[17px] accent-sage shrink-0" />
+        <label for="discBot" class="text-[13px] text-clay-sand flex-1">
+          {{ t('discs.bot') }} <small class="text-clay-terracotta">⌀{{ dBot || 0 }} {{ unit }}</small>
         </label>
       </div>
       <div class="flex items-center gap-2.5 mt-2">
-        <input id="discTop" type="checkbox" v-model="discTop" class="w-[17px] h-[17px] accent-teal shrink-0" />
-        <label for="discTop" class="text-[13px] text-[#d8d4ca] flex-1">
-          {{ t('discs.top') }} <small class="text-[#8f8a7e]">⌀{{ dTop || 0 }} {{ unit }}</small>
+        <input id="discTop" type="checkbox" v-model="discTop" class="w-[17px] h-[17px] accent-sage shrink-0" />
+        <label for="discTop" class="text-[13px] text-clay-sand flex-1">
+          {{ t('discs.top') }} <small class="text-clay-terracotta">⌀{{ dTop || 0 }} {{ unit }}</small>
         </label>
       </div>
-      <p v-if="discBot || discTop" class="text-[12px] text-[#9c968a] mt-2.5 leading-[1.45]">
+      <p v-if="discBot || discTop" class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
         {{ t('discs.note') }}
       </p>
     </div>
@@ -98,7 +98,7 @@
     <!-- Schematic -->
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('shape.label') }}</div>
-      <div class="bg-[#1b1a17] border border-[#3a382f] rounded-[9px] px-2.5 pt-3 pb-1.5 mt-1">
+      <div class="bg-frame-3 border border-frame-rule rounded-[9px] px-2.5 pt-3 pb-1.5 mt-1">
         <svg viewBox="0 0 300 180" class="w-full h-auto block" :aria-label="t('shape.label')" v-html="schematicSvg" />
       </div>
     </div>
@@ -106,13 +106,13 @@
     <!-- Readouts -->
     <div class="mb-[22px]">
       <div class="group-lbl">{{ t('computed.label') }}</div>
-      <div v-if="!geo.ok" class="grid grid-cols-2 gap-px bg-[#3a382f] border border-[#3a382f] rounded-[9px] overflow-hidden">
+      <div v-if="!geo.ok" class="grid grid-cols-2 gap-px bg-frame-rule border border-frame-rule rounded-[9px] overflow-hidden">
         <div class="col-span-2 bg-frame-2 px-[11px] py-[9px]">
           <div class="readout-k">{{ t('computed.label') }}</div>
-          <div class="readout-v text-[#c9aa66]">{{ t('computed.statusError') }}</div>
+          <div class="readout-v text-warn">{{ t('computed.statusError') }}</div>
         </div>
       </div>
-      <div v-else class="grid grid-cols-2 gap-px bg-[#3a382f] border border-[#3a382f] rounded-[9px] overflow-hidden">
+      <div v-else class="grid grid-cols-2 gap-px bg-frame-rule border border-frame-rule rounded-[9px] overflow-hidden">
         <div v-for="([k, v]) in readoutRows" :key="k" class="bg-frame-2 px-[11px] py-[9px]">
           <div class="readout-k">{{ k }}</div>
           <div class="readout-v">{{ v }}</div>
@@ -184,11 +184,11 @@ const schematicSvg = computed(() => {
   const maxW = Math.max(top, bot, 1), sc = 150 / maxW
   const tw = top * sc / 2, bw = bot * sc / 2, yT = mT, yB = H - mB
   const pts = `${cx-tw},${yT} ${cx+tw},${yT} ${cx+bw},${yB} ${cx-bw},${yB}`
-  const ac = '#2F6F73', mf = `ui-monospace,monospace`
+  const ac = '#7C9473', mf = `ui-monospace,monospace`
   const hmx = cx + Math.max(tw, bw) + 16
   const hmy = (yT + yB) / 2
   return (
-    `<polygon points="${pts}" fill="#2F6F73" fill-opacity="0.12" stroke="#c9c4b6" stroke-width="1.2"/>` +
+    `<polygon points="${pts}" fill="#7C9473" fill-opacity="0.12" stroke="#E4D6C3" stroke-width="1.2"/>` +
     `<line x1="${cx-tw}" y1="${yT-9}" x2="${cx+tw}" y2="${yT-9}" stroke="${ac}" stroke-width="1"/>` +
     `<text x="${cx}" y="${yT-13}" fill="${ac}" font-family="${mf}" font-size="11" text-anchor="middle">${t('schematic.top', { v: top })}</text>` +
     `<line x1="${cx-bw}" y1="${yB+11}" x2="${cx+bw}" y2="${yB+11}" stroke="${ac}" stroke-width="1"/>` +
@@ -229,30 +229,30 @@ const readoutRows = computed(() => {
 
 <style scoped>
 .group-lbl {
-  @apply text-[11px] uppercase tracking-[0.12em] text-[#9c968a] mb-2.5 font-semibold;
+  @apply text-[11px] uppercase tracking-[0.12em] text-clay-terracotta mb-2.5 font-semibold;
 }
 .field-input {
-  @apply w-full bg-field border border-[#d8d3c6] rounded-[7px] py-[9px] pr-[42px] pl-[11px] font-mono text-[15px] text-ink;
-  @apply focus:outline-none focus:ring-2 focus:ring-teal focus:border-teal;
+  @apply w-full bg-field border border-paper-edge rounded-[7px] py-[9px] pr-[42px] pl-[11px] font-mono text-[15px] text-ink;
+  @apply focus:outline-none focus:ring-2 focus:ring-sage focus:border-sage;
   @apply disabled:opacity-40;
 }
 .field-unit {
   @apply absolute right-[11px] text-ink-soft font-mono text-[12px] pointer-events-none;
 }
 .readout-k {
-  @apply text-[10.5px] uppercase tracking-[0.06em] text-[#8f8a7e];
+  @apply text-[10.5px] uppercase tracking-[0.06em] text-clay-terracotta;
 }
 .readout-v {
-  @apply font-mono text-[15px] text-[#EDEAE1] mt-0.5;
+  @apply font-mono text-[15px] text-clay-bisque mt-0.5;
 }
 .btn {
   @apply flex items-center justify-center gap-2 px-3 py-[11px] rounded-lg text-[14px] font-[550] cursor-pointer border transition-colors;
   @apply disabled:opacity-40 disabled:cursor-not-allowed;
 }
 .btn-primary {
-  @apply bg-teal text-white border-transparent hover:bg-teal-dark;
+  @apply bg-sage text-ink border-transparent hover:bg-sage-light;
 }
 .btn-ghost {
-  @apply bg-transparent text-[#d8d4ca] border-[#4a4842] hover:border-[#6a685f] hover:text-white;
+  @apply bg-transparent text-clay-sand border-frame-line hover:border-clay-fired hover:text-clay-bisque;
 }
 </style>

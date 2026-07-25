@@ -1,7 +1,7 @@
 <template>
   <section
     class="relative bg-paper overflow-auto min-h-[70vh] md:min-h-0 flex items-center justify-center p-[26px]"
-    :style="{ backgroundImage: 'radial-gradient(#E3DFD5 1px, transparent 1px)', backgroundSize: '14px 14px' }"
+    :style="{ backgroundImage: 'radial-gradient(#E4D6C3 1px, transparent 1px)', backgroundSize: '14px 14px' }"
   >
     <div
       v-if="svgHtml"
@@ -13,10 +13,10 @@
       {{ t('canvas.empty') }}
     </div>
 
-    <div class="absolute left-[18px] bottom-[14px] text-[12px] text-ink-soft bg-white/60 px-2.5 py-[5px] rounded-[6px] border border-paper-edge max-w-[44ch] leading-snug">
+    <div class="absolute left-[18px] bottom-[14px] text-[12px] text-ink-soft bg-paper/80 px-2.5 py-[5px] rounded-[6px] border border-paper-edge max-w-[44ch] leading-snug">
       <i18n-t keypath="canvas.hint" tag="span">
-        <template #ruler><strong class="text-teal">{{ t('canvas.hintRuler') }}</strong></template>
-        <template #pct><strong class="text-teal">{{ t('canvas.hintPct') }}</strong></template>
+        <template #ruler><strong class="text-sage-deep">{{ t('canvas.hintRuler') }}</strong></template>
+        <template #pct><strong class="text-sage-deep">{{ t('canvas.hintPct') }}</strong></template>
       </i18n-t>
     </div>
   </section>

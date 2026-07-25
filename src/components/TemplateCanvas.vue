@@ -4,7 +4,7 @@
   <!-- The paper-and-dot-grid desk belongs to the 1:1 drawing. The 3D view gets a
        plain dark field instead: uniform, edge to edge, nothing framing it. -->
   <section
-    class="relative overflow-hidden h-[70vh] md:h-auto transition-colors
+    class="relative overflow-hidden h-[70vh] md:h-auto transition-colors flex flex-col
            px-[26px] pt-[26px] pb-[76px] md:px-8 md:pt-8"
     :class="isShape ? 'bg-frame-3' : 'bg-paper'"
     :style="isShape ? {} : {
@@ -12,20 +12,45 @@
       backgroundSize: '14px 14px',
     }"
   >
-    <TemplateSheet
-      v-if="!isShape"
-      :svgHtml="svgHtml"
-      :aspect="aspect"
-      :emptyLabel="t('canvas.empty')"
-    />
-    <ShapeWireframe
-      v-else
-      bare
-      :geo="geo"
-      :label="t('shape.label')"
-      :hint="t('shape.dragHint')"
-      :emptyLabel="t('shape.empty')"
-    />
+    <!-- Mixing a round ring with a faceted one has no exact flat solution, so the
+         round side is approximated and the result is unproven. Shown in both
+         views, since the CTA can be reached from either. Kept in the flow rather
+         than floated, so it never covers the drawing on a short pane; the right
+         margin keeps it clear of the swap button. -->
+    <div
+      v-if="mixed"
+      class="shrink-0 mb-3 mr-[46px] md:mr-[150px] flex items-start gap-2
+             text-[12px] leading-snug rounded-[6px] px-2.5 py-2 border"
+      :class="isShape
+        ? 'bg-frame-2/90 border-clay-fired text-clay-sand'
+        : 'bg-paper/90 border-warn text-ink-soft'"
+      role="status"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" class="shrink-0 mt-px text-warn"
+           aria-hidden="true">
+        <path d="M12 9v4" /><path d="M12 17h.01" />
+        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+      </svg>
+      <span><strong class="font-semibold">{{ t('warn.experimentalTag') }}:</strong> {{ t('warn.mixed') }}</span>
+    </div>
+
+    <div class="flex-1 min-h-0">
+      <TemplateSheet
+        v-if="!isShape"
+        :svgHtml="svgHtml"
+        :aspect="aspect"
+        :emptyLabel="t('canvas.empty')"
+      />
+      <ShapeWireframe
+        v-else
+        bare
+        :geo="geo"
+        :label="t('shape.label')"
+        :hint="t('shape.dragHint')"
+        :emptyLabel="t('shape.empty')"
+      />
+    </div>
 
     <!-- Swaps this pane with the sidebar slot, so either view can have the room. -->
     <button
@@ -98,4 +123,7 @@ const props = defineProps({
 defineEmits(['downloadPdf', 'swapViews'])
 
 const isShape = computed(() => props.view === 'shape')
+// Set only on the faceted path, and only when exactly one ring is round — which
+// is precisely the mixed case with no exact flat solution.
+const mixed = computed(() => !!props.geo?.approximated)
 </script>

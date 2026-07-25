@@ -174,6 +174,10 @@ const pdfLoading = ref(false)
 
 async function handleDownloadPdf() {
   if (!geo.value.ok || pdfLoading.value) return
+  // The mixed round/faceted case has no exact flat solution, so warn before
+  // producing something that gets printed and cut. Cancellable rather than a
+  // bare notice, since the output may not be worth the paper.
+  if (geo.value.approximated && !confirm(t('warn.mixedConfirm'))) return
   pdfLoading.value = true
   const g = geo.value
   const u = state.unit

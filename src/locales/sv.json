@@ -136,5 +136,10 @@
   },
   "size": {
     "banana": "banan {len}"
+  },
+  "warn": {
+    "experimentalTag": "Experimentellt",
+    "mixed": "Att blanda en rund ring med en facetterad är oprövat. Mallen delas upp i många små bitar och vi vet inte hur väl den fungerar i praktiken.",
+    "mixedConfirm": "Experimentellt: att blanda en rund ring med en facetterad är oprövat. Mallen delas upp i många små bitar och vi vet inte hur väl den fungerar i praktiken.\n\nVill du ladda ner PDF:en ändå?"
   }
 }

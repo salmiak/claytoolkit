@@ -136,5 +136,10 @@
   },
   "size": {
     "banana": "banana {len}"
+  },
+  "warn": {
+    "experimentalTag": "Experimental",
+    "mixed": "Mixing a round ring with a faceted one is untested. The template is split into many small pieces and we are unsure how well it works in practice.",
+    "mixedConfirm": "Experimental: mixing a round ring with a faceted one is untested. The template is split into many small pieces and we are unsure how well it works in practice.\n\nDownload the PDF anyway?"
   }
 }

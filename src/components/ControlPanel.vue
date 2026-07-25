@@ -218,6 +218,20 @@
           </div>
         </div>
 
+        <!-- Size: flat side view with the banana for scale -->
+        <div v-show="!isDesktop || activeTab === 'size'" :class="isDesktop ? '' : 'mb-[22px]'">
+          <div v-if="!isDesktop" class="group-lbl">{{ t('tabs.size') }}</div>
+          <div class="h-[190px]">
+            <SizeProfile
+              :geo="geo"
+              :unit="unit"
+              :label="t('tabs.size')"
+              :bananaLabel="t('size.banana')"
+              :emptyLabel="t('shape.empty')"
+            />
+          </div>
+        </div>
+
         <!-- Calculations -->
         <div v-show="!isDesktop || activeTab === 'calc'" :class="isDesktop ? '' : 'mb-[22px]'">
           <div v-if="!isDesktop" class="group-lbl">{{ t('computed.label') }}</div>
@@ -264,6 +278,7 @@ import { useI18n } from 'vue-i18n'
 import { fmt } from '../composables/useGeometry.js'
 import ShapeWireframe from './ShapeWireframe.vue'
 import TemplateSheet from './TemplateSheet.vue'
+import SizeProfile from './SizeProfile.vue'
 import { useMediaQuery } from '../composables/useMediaQuery.js'
 
 const { t } = useI18n()
@@ -274,6 +289,7 @@ const activeTab = ref('shape')
 
 const tabs = computed(() => [
   { id: 'shape',  label: bigView.value === 'template' ? t('tabs.shape') : t('tabs.template') },
+  { id: 'size',   label: t('tabs.size') },
   { id: 'calc',   label: t('tabs.calc') },
   { id: 'export', label: t('tabs.export') },
 ])

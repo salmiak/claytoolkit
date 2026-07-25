@@ -64,7 +64,8 @@
     "shape": "Form",
     "calc": "Beräkningar",
     "export": "Export",
-    "template": "Mall"
+    "template": "Mall",
+    "size": "Storlek"
   },
   "actions": {
     "pdf": "Ladda ner PDF (A4, flera sidor)",
@@ -132,5 +133,8 @@
     "noteFaceted": "Sidlängden är måttet på en sida. Mallen visar varje sida en gång med antal att klippa.",
     "corners": "Hörn",
     "round": "Rund"
+  },
+  "size": {
+    "banana": "banan ~18 cm"
   }
 }

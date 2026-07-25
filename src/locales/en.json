@@ -64,7 +64,8 @@
     "shape": "Shape",
     "calc": "Calculations",
     "export": "Export",
-    "template": "Template"
+    "template": "Template",
+    "size": "Size"
   },
   "actions": {
     "pdf": "Download PDF (A4, multi-page)",
@@ -132,5 +133,8 @@
     "noteFaceted": "Side length is the measurement across one face. The template shows each side once with how many to cut.",
     "corners": "Corners",
     "round": "Round"
+  },
+  "size": {
+    "banana": "banana ~18 cm"
   }
 }

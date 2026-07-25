@@ -47,8 +47,14 @@
     "height": "Höjd",
     "shrinkReadout": "Krympmån (mallmått)"
   },
+  "tabs": {
+    "shape": "Form",
+    "calc": "Beräkningar",
+    "export": "Export"
+  },
   "actions": {
     "pdf": "Ladda ner PDF (A4, flera sidor)",
+    "pdfShort": "Ladda ner PDF",
     "svg": "Ladda ner SVG (1:1)",
     "print": "Skriv ut mallen",
     "pdfCreating": "Skapar PDF…"

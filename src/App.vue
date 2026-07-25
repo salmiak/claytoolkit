@@ -29,7 +29,12 @@
         @downloadPdf="handleDownloadPdf"
         @print="handlePrint"
       />
-      <TemplateCanvas :svgHtml="svgHtml" />
+      <TemplateCanvas
+        :svgHtml="svgHtml"
+        :pdfLoading="pdfLoading"
+        :disabled="!geo.ok"
+        @downloadPdf="handleDownloadPdf"
+      />
     </main>
 
     <div id="printarea" style="display:none"></div>

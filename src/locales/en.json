@@ -47,8 +47,14 @@
     "height": "Height",
     "shrinkReadout": "Shrinkage (template size)"
   },
+  "tabs": {
+    "shape": "Shape",
+    "calc": "Calculations",
+    "export": "Export"
+  },
   "actions": {
     "pdf": "Download PDF (A4, multi-page)",
+    "pdfShort": "Download PDF",
     "svg": "Download SVG (1:1)",
     "print": "Print template",
     "pdfCreating": "Generating PDF…"

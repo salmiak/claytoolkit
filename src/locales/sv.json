@@ -15,7 +15,8 @@
     "heightHint": "(lodrätt)",
     "colTop": "Topp",
     "colBot": "Botten",
-    "diameter": "Diameter"
+    "diameter": "Diameter",
+    "side": "Sidlängd"
   },
   "shrink": {
     "label": "Krympmån",
@@ -53,7 +54,9 @@
     "distinct": "Olika mallar",
     "edgeBot": "Kantlängd botten",
     "edgeTop": "Kantlängd topp",
-    "approx": "Rund ring approximerad"
+    "approx": "Rund ring approximerad",
+    "diaTop": "Diameter topp",
+    "diaBot": "Diameter botten"
   },
   "tabs": {
     "shape": "Form",
@@ -125,7 +128,7 @@
     "nBot": "Hörn botten",
     "rotation": "Vrid toppen",
     "noteRound": "Rund form. Avmarkera Rund för att ge en ring hörn.",
-    "noteFaceted": "Diametern mäts över hörnen. Mallen visar varje sida en gång med antal att klippa.",
+    "noteFaceted": "Sidlängden är måttet på en sida. Mallen visar varje sida en gång med antal att klippa.",
     "corners": "Hörn",
     "round": "Rund"
   }

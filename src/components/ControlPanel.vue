@@ -29,8 +29,16 @@
               {{ col.heading }}
             </div>
 
+            <!-- Round leads the column: it governs both fields below it, and
+                 switches the first one between a diameter and a side length. -->
+            <div class="flex items-center gap-2 mb-2.5">
+              <input :id="col.rId" type="checkbox" v-model="col.round.value"
+                     class="w-[15px] h-[15px] accent-sage shrink-0" />
+              <label :for="col.rId" class="text-[12px] text-clay-sand">{{ t('faces.round') }}</label>
+            </div>
+
             <label :for="col.dId" class="block text-[12px] mb-[4px] text-clay-sand">
-              {{ t('dims.diameter') }}
+              {{ col.round.value ? t('dims.diameter') : t('dims.side') }}
             </label>
             <div class="relative flex items-center mb-2.5">
               <input
@@ -44,13 +52,6 @@
               <span class="field-unit">{{ unit }}</span>
             </div>
 
-            <!-- Round sits above Corners, so it reads as the switch for the
-                 field it enables. -->
-            <div class="flex items-center gap-2 mb-2">
-              <input :id="col.rId" type="checkbox" v-model="col.round.value"
-                     class="w-[15px] h-[15px] accent-sage shrink-0" />
-              <label :for="col.rId" class="text-[12px] text-clay-sand">{{ t('faces.round') }}</label>
-            </div>
             <label :for="col.nId" class="block text-[12px] mb-[4px]"
                    :class="col.round.value ? 'text-clay-terracotta' : 'text-clay-sand'">
               {{ t('faces.corners') }}
@@ -373,8 +374,12 @@ const readoutRows = computed(() => {
       [t('computed.distinct'),  String(g.faces.length)],
       [t('computed.slant'),     `${fmt(m.L, u)} ${u}`],
     )
-    if (g.edgeBot) rows.push([t('computed.edgeBot'), `${fmt(g.edgeBot, u)} ${u}`])
-    if (g.edgeTop) rows.push([t('computed.edgeTop'), `${fmt(g.edgeTop, u)} ${u}`])
+    // A faceted ring is entered as a side length, so its diameter is the
+    // derived value worth showing. A round ring is the other way round.
+    if (g.nBot >= 3) rows.push([t('computed.diaBot'), `⌀${fmt(g.rBot * 2, u)} ${u}`])
+    else if (g.edgeBot) rows.push([t('computed.edgeBot'), `${fmt(g.edgeBot, u)} ${u}`])
+    if (g.nTop >= 3) rows.push([t('computed.diaTop'), `⌀${fmt(g.rTop * 2, u)} ${u}`])
+    else if (g.edgeTop) rows.push([t('computed.edgeTop'), `${fmt(g.edgeTop, u)} ${u}`])
     if (g.approximated) rows.push([t('computed.approx'), `${g.nBot < 3 ? g.segBot : g.segTop}`])
     return rows
   }

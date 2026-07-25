@@ -15,7 +15,8 @@
     "heightHint": "(vertical)",
     "colTop": "Top",
     "colBot": "Bottom",
-    "diameter": "Diameter"
+    "diameter": "Diameter",
+    "side": "Side length"
   },
   "shrink": {
     "label": "Shrinkage",
@@ -53,7 +54,9 @@
     "distinct": "Distinct templates",
     "edgeBot": "Edge length bottom",
     "edgeTop": "Edge length top",
-    "approx": "Round ring approximated"
+    "approx": "Round ring approximated",
+    "diaTop": "Diameter top",
+    "diaBot": "Diameter bottom"
   },
   "tabs": {
     "shape": "Shape",
@@ -125,7 +128,7 @@
     "nBot": "Corners bottom",
     "rotation": "Rotate top",
     "noteRound": "Round shape. Untick Round to give a ring corners.",
-    "noteFaceted": "Diameter is measured across the corners. The template shows each side once with how many to cut.",
+    "noteFaceted": "Side length is the measurement across one face. The template shows each side once with how many to cut.",
     "corners": "Corners",
     "round": "Round"
   }

@@ -111,11 +111,24 @@ const svgLabels = computed(() => ({
 // count below 3 would quietly turn the ring round while its box says otherwise.
 const corners = (isRound, v) => isRound ? 0 : Math.max(3, +v || 3)
 
-const geo = computed(() => calcGeometry({
-  ...state,
-  nTop: corners(state.roundTop, state.nTop),
-  nBot: corners(state.roundBot, state.nBot),
-}))
+// A round ring is given its diameter; a faceted one is given the length of one
+// side, which is what actually gets measured on the slab. calcGeometry works in
+// circumscribed diameters throughout, so the side length is converted here:
+// a regular n-gon of side s has circumdiameter s / sin(pi/n).
+const toDiameter = (isRound, value, n) =>
+  isRound ? value : (+value || 0) / Math.sin(Math.PI / n)
+
+const geo = computed(() => {
+  const nTop = corners(state.roundTop, state.nTop)
+  const nBot = corners(state.roundBot, state.nBot)
+  return calcGeometry({
+    ...state,
+    nTop,
+    nBot,
+    dTop: toDiameter(state.roundTop, state.dTop, nTop),
+    dBot: toDiameter(state.roundBot, state.dBot, nBot),
+  })
+})
 const tpl     = computed(() => geo.value.ok ? buildTemplate(geo.value, state.unit, svgLabels.value) : null)
 const svgHtml = computed(() => tpl.value ? svgString(tpl.value, false) : null)
 

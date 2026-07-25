@@ -63,18 +63,22 @@ function cutPolygon(g) {
     if (seam > 0) seams.push([{ x: -seam, y: 0 }, { x: 0, y: 0 }, { x: 0, y: H }, { x: -seam, y: H }])
   } else {
     const { Ro, Ri, theta, seam } = g, ht = theta / 2, C = { x: 0, y: 0 }
+    // Same vertical mirror as the preview, taken from the geometry so the two
+    // can't drift apart: the pot's base is always at the base of the drawing.
+    const flip = g.flip ?? 1
+    const F = p => ({ x: p.x, y: p.y * flip })
     const segO = Math.max(24, Math.ceil(theta * Ro / 0.8))
     const segI = Math.max(24, Math.ceil(theta * Ri / 0.8))
     const poly = []
-    for (let i = 0; i <= segO; i++) poly.push(P(C.x, C.y, Ro, -ht + theta * i / segO))
-    for (let i = 0; i <= segI; i++) poly.push(P(C.x, C.y, Ri, ht - theta * i / segI))
+    for (let i = 0; i <= segO; i++) poly.push(F(P(C.x, C.y, Ro, -ht + theta * i / segO)))
+    for (let i = 0; i <= segI; i++) poly.push(F(P(C.x, C.y, Ri, ht - theta * i / segI)))
     polys.push(poly)
     if (seam > 0) {
       const nl = { x: -Math.cos(ht), y: -Math.sin(ht) }, nr = { x: Math.cos(ht), y: -Math.sin(ht) }
       const Pol = P(C.x, C.y, Ro, -ht), Pil = P(C.x, C.y, Ri, -ht)
       const Por = P(C.x, C.y, Ro, ht), Pir = P(C.x, C.y, Ri, ht)
-      seams.push([Pol, Pil, { x: Pil.x + seam * nl.x, y: Pil.y + seam * nl.y }, { x: Pol.x + seam * nl.x, y: Pol.y + seam * nl.y }])
-      seams.push([Por, Pir, { x: Pir.x + seam * nr.x, y: Pir.y + seam * nr.y }, { x: Por.x + seam * nr.x, y: Por.y + seam * nr.y }])
+      seams.push([Pol, Pil, { x: Pil.x + seam * nl.x, y: Pil.y + seam * nl.y }, { x: Pol.x + seam * nl.x, y: Pol.y + seam * nl.y }].map(F))
+      seams.push([Por, Pir, { x: Pir.x + seam * nr.x, y: Pir.y + seam * nr.y }, { x: Por.x + seam * nr.x, y: Por.y + seam * nr.y }].map(F))
     }
   }
 

@@ -191,6 +191,11 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   const Ri = Rsmall * L / dR
   const theta = TAU * dR / L
   return {
+    // The unrolled sector always puts the wider ring on the outer arc. When the
+    // TOP is the wider one, drawing it as-is would put the pot's top edge along
+    // the bottom of the sheet, so the whole sector is mirrored vertically and the
+    // pot's base always ends up at the base of the drawing.
+    flip: rTop > rBot ? -1 : 1,
     ok: true, cyl: false, Ro, Ri, theta, h, seam, rTop, rBot, Rbig, Rsmall, nTop, nBot, rotDeg, discs, shrink: { p: sp, k },
     metrics: {
       L, Ri, Ro, thetaDeg: theta * 180 / Math.PI,
@@ -242,25 +247,32 @@ export function buildTemplate(g, unit, labels) {
     return finalize(inner, bb, pad)
   }
 
-  const { Ro, Ri, theta, seam } = g
+  const { Ro, Ri, theta, seam, flip } = g
   const Cx = 0, Cy = 0, ht = theta / 2
-  const Pol = P(Cx, Cy, Ro, -ht), Por = P(Cx, Cy, Ro, ht)
-  const Pil = P(Cx, Cy, Ri, -ht), Pir = P(Cx, Cy, Ri, ht)
+  // Mirror vertically when the top is the wider ring, so the pot's base is
+  // always drawn at the base of the sheet. Offsets are computed unmirrored and
+  // then flipped, so the seam normals stay correct either way.
+  const F = p => ({ x: p.x, y: p.y * flip })
+  const Pol0 = P(Cx, Cy, Ro, -ht), Por0 = P(Cx, Cy, Ro, ht)
+  const Pil0 = P(Cx, Cy, Ri, -ht), Pir0 = P(Cx, Cy, Ri, ht)
+  const Pol = F(Pol0), Por = F(Por0), Pil = F(Pil0), Pir = F(Pir0)
   const large = theta > Math.PI ? 1 : 0
+  // A vertical mirror reverses arc direction, so the sweep flags invert with it.
+  const [swOut, swIn] = flip > 0 ? [0, 1] : [1, 0]
 
   for (let i = 0; i <= 120; i++) {
     const phi = -ht + theta * i / 120
-    track(P(Cx, Cy, Ro, phi)); track(P(Cx, Cy, Ri, phi))
+    track(F(P(Cx, Cy, Ro, phi))); track(F(P(Cx, Cy, Ri, phi)))
   }
 
   let seamPath = ''
   if (seam > 0) {
     const nl = { x: -Math.cos(ht), y: -Math.sin(ht) }
     const nr = { x: Math.cos(ht), y: -Math.sin(ht) }
-    const PolL = { x: Pol.x + seam * nl.x, y: Pol.y + seam * nl.y }
-    const PilL = { x: Pil.x + seam * nl.x, y: Pil.y + seam * nl.y }
-    const PorR = { x: Por.x + seam * nr.x, y: Por.y + seam * nr.y }
-    const PirR = { x: Pir.x + seam * nr.x, y: Pir.y + seam * nr.y }
+    const PolL = F({ x: Pol0.x + seam * nl.x, y: Pol0.y + seam * nl.y })
+    const PilL = F({ x: Pil0.x + seam * nl.x, y: Pil0.y + seam * nl.y })
+    const PorR = F({ x: Por0.x + seam * nr.x, y: Por0.y + seam * nr.y })
+    const PirR = F({ x: Pir0.x + seam * nr.x, y: Pir0.y + seam * nr.y })
     ;[PolL, PilL, PorR, PirR].forEach(track)
     seamPath =
       `<path class="seam" d="M ${n(Pol.x)} ${n(Pol.y)} L ${n(Pil.x)} ${n(Pil.y)} L ${n(PilL.x)} ${n(PilL.y)} L ${n(PolL.x)} ${n(PolL.y)} Z"/>` +
@@ -269,21 +281,30 @@ export function buildTemplate(g, unit, labels) {
 
   const d =
     `M ${n(Pol.x)} ${n(Pol.y)} ` +
-    `A ${n(Ro)} ${n(Ro)} 0 ${large} 0 ${n(Por.x)} ${n(Por.y)} ` +
+    `A ${n(Ro)} ${n(Ro)} 0 ${large} ${swOut} ${n(Por.x)} ${n(Por.y)} ` +
     `L ${n(Pir.x)} ${n(Pir.y)} ` +
-    `A ${n(Ri)} ${n(Ri)} 0 ${large} 1 ${n(Pil.x)} ${n(Pil.y)} Z`
+    `A ${n(Ri)} ${n(Ri)} 0 ${large} ${swIn} ${n(Pil.x)} ${n(Pil.y)} Z`
 
   inner += seamPath
   inner += `<path class="cut-fill" d="${d}"/>`
 
-  const bIn = P(Cx, Cy, Ri, 0), bOut = P(Cx, Cy, Ro, 0)
+  // The outer arc carries whichever ring is wider — not always the bottom.
+  const outerIsTop = g.rTop > g.rBot
+  const outer = { name: outerIsTop ? labels.top : labels.bot,
+                  arc: outerIsTop ? g.metrics.arcTop : g.metrics.arcBot }
+  const innerR = { name: outerIsTop ? labels.bot : labels.top,
+                   arc: outerIsTop ? g.metrics.arcBot : g.metrics.arcTop }
+  const arcText = r => `${r.name} ⌀${fmt(r.arc / Math.PI, unit)} · ${labels.arc} ${fmt(r.arc, unit)} ${unit}`
+
+  const bIn = F(P(Cx, Cy, Ri, 0)), bOut = F(P(Cx, Cy, Ro, 0))
   inner += `<line class="dim" x1="${n(bIn.x)}" y1="${n(bIn.y)}" x2="${n(bOut.x)}" y2="${n(bOut.y)}"/>`
   inner += tick(bIn, 3)
   inner += tick(bOut, 3)
   inner += `<text class="dim-txt" x="${n(bOut.x + 3)}" y="${n((bIn.y + bOut.y) / 2)}">${labels.slant} ${fmt(g.metrics.L, unit)} ${unit}</text>`
-  inner += `<text class="lbl-txt" x="${n(bOut.x)}" y="${n(bOut.y + 7)}" text-anchor="middle">${labels.bot} ⌀${fmt(g.metrics.arcBot / Math.PI, unit)} · ${labels.arc} ${fmt(g.metrics.arcBot, unit)} ${unit}</text>`
-  inner += `<text class="lbl-sub" x="${n(bIn.x)}" y="${n(bIn.y - 3)}" text-anchor="middle">${labels.top} ⌀${fmt(g.metrics.arcTop / Math.PI, unit)} · ${labels.arc} ${fmt(g.metrics.arcTop, unit)} ${unit}</text>`
-  inner += `<text class="dim-txt" x="${n(Pol.x - 2)}" y="${n(Pol.y - 3)}" text-anchor="end">${labels.angle} ${g.metrics.thetaDeg.toFixed(1)}°</text>`
+  // Labels sit outside their own arc, which swaps sides along with the mirror.
+  inner += `<text class="lbl-txt" x="${n(bOut.x)}" y="${n(bOut.y + (flip > 0 ? 7 : -4))}" text-anchor="middle">${arcText(outer)}</text>`
+  inner += `<text class="lbl-sub" x="${n(bIn.x)}" y="${n(bIn.y + (flip > 0 ? -3 : 8))}" text-anchor="middle">${arcText(innerR)}</text>`
+  inner += `<text class="dim-txt" x="${n(Pol.x - 2)}" y="${n(Pol.y + (flip > 0 ? -3 : 8))}" text-anchor="end">${labels.angle} ${g.metrics.thetaDeg.toFixed(1)}°</text>`
 
   inner += drawDiscs(g, bb, track, unit, labels)
   inner += ruler(bb, bb.minx, labels, unit)

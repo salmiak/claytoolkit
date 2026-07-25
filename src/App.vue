@@ -31,6 +31,7 @@
       />
       <TemplateCanvas
         :svgHtml="svgHtml"
+        :aspect="aspect"
         :pdfLoading="pdfLoading"
         :disabled="!geo.ok"
         @downloadPdf="handleDownloadPdf"
@@ -97,6 +98,7 @@ const svgLabels = computed(() => ({
 const geo     = computed(() => calcGeometry(state))
 const tpl     = computed(() => geo.value.ok ? buildTemplate(geo.value, state.unit, svgLabels.value) : null)
 const svgHtml = computed(() => tpl.value ? svgString(tpl.value, false) : null)
+const aspect  = computed(() => tpl.value && tpl.value.h > 0 ? tpl.value.w / tpl.value.h : 1)
 
 function handleDownloadSvg() {
   if (!tpl.value) return

@@ -1,12 +1,25 @@
 <template>
+  <!-- Definite height so the sheet's percentage limits below resolve, and extra
+       room at the bottom so the growing sheet never slides under the hint or
+       the floating CTA. -->
   <section
-    class="relative bg-paper overflow-auto min-h-[70vh] md:min-h-0 flex items-center justify-center p-[26px]"
+    ref="pane"
+    class="relative bg-paper overflow-hidden h-[70vh] md:h-auto flex items-center justify-center
+           px-[26px] pt-[26px] pb-[76px] md:px-8 md:pt-8"
     :style="{ backgroundImage: 'radial-gradient(#E4D6C3 1px, transparent 1px)', backgroundSize: '14px 14px' }"
   >
+    <!-- Sized in JS: CSS can't express "largest box of this ratio that fits" for
+         a plain element. aspect-ratio with width:100% leaves the width definite,
+         so max-height clamps the height and stretches the sheet instead of
+         scaling it down. -->
     <div
       v-if="svgHtml"
-      class="bg-paper border border-paper-edge max-w-full max-h-full"
-      style="box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 18px 40px -22px rgba(0,0,0,.4)"
+      class="template-sheet bg-paper border border-paper-edge"
+      :style="{
+        width: fitted.w + 'px',
+        height: fitted.h + 'px',
+        boxShadow: '0 1px 0 rgba(0,0,0,.04), 0 18px 40px -22px rgba(0,0,0,.4)',
+      }"
       v-html="svgHtml"
     />
     <div v-else class="text-ink-soft text-[15px] text-center max-w-[34ch] leading-relaxed">
@@ -42,24 +55,62 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-defineProps({
+const pane = ref(null)
+const avail = ref({ w: 0, h: 0 })
+
+function measure() {
+  const el = pane.value
+  if (!el) return
+  const cs = getComputedStyle(el)
+  avail.value = {
+    w: el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+    h: el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom),
+  }
+}
+
+let ro = null
+onMounted(() => {
+  measure()
+  ro = new ResizeObserver(measure)
+  ro.observe(pane.value)
+})
+onUnmounted(() => ro?.disconnect())
+
+const props = defineProps({
   svgHtml:    { type: String,  default: null },
   pdfLoading: { type: Boolean, default: false },
   disabled:   { type: Boolean, default: false },
+  // Template width / height. Gives the sheet the drawing's own shape, so it can
+  // be scaled up without letterboxing inside it.
+  aspect:     { type: Number,  default: 1 },
 })
 
 defineEmits(['downloadPdf'])
+
+// The largest box of the drawing's ratio that fits the padded pane: fill the
+// width, and if that overflows vertically, fall back to filling the height.
+const fitted = computed(() => {
+  const { w: aw, h: ah } = avail.value
+  const r = props.aspect > 0 ? props.aspect : 1
+  if (aw <= 0 || ah <= 0) return { w: 0, h: 0 }
+  let w = aw, h = aw / r
+  if (h > ah) { h = ah; w = ah * r }
+  return { w: Math.floor(w), h: Math.floor(h) }
+})
 </script>
 
 <style scoped>
-:deep(svg) {
+/* Scoped to the sheet: an unqualified :deep(svg) would also stretch the icon
+   inside the download button. Fills the sheet exactly, since the sheet already
+   matches the viewBox ratio. */
+.template-sheet :deep(svg) {
   display: block;
-  max-width: 100%;
-  max-height: 78vh;
-  height: auto;
+  width: 100%;
+  height: 100%;
 }
 </style>

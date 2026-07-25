@@ -44,6 +44,13 @@
               <span class="field-unit">{{ unit }}</span>
             </div>
 
+            <!-- Round sits above Corners, so it reads as the switch for the
+                 field it enables. -->
+            <div class="flex items-center gap-2 mb-2">
+              <input :id="col.rId" type="checkbox" v-model="col.round.value"
+                     class="w-[15px] h-[15px] accent-sage shrink-0" />
+              <label :for="col.rId" class="text-[12px] text-clay-sand">{{ t('faces.round') }}</label>
+            </div>
             <label :for="col.nId" class="block text-[12px] mb-[4px]"
                    :class="col.round.value ? 'text-clay-terracotta' : 'text-clay-sand'">
               {{ t('faces.corners') }}
@@ -58,11 +65,6 @@
                 @keydown="onStepKey($event, v => col.n.value = v)"
                 class="field-input field-narrow !pr-[11px]"
               />
-            </div>
-            <div class="flex items-center gap-2 mt-2">
-              <input :id="col.rId" type="checkbox" v-model="col.round.value"
-                     class="w-[15px] h-[15px] accent-sage shrink-0" />
-              <label :for="col.rId" class="text-[12px] text-clay-sand">{{ t('faces.round') }}</label>
             </div>
           </div>
         </div>

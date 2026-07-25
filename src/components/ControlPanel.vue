@@ -40,6 +40,49 @@
         </div>
       </div>
 
+      <!-- Faces -->
+      <div class="mb-[22px]">
+        <div class="group-lbl">{{ t('faces.label') }}</div>
+        <div class="flex gap-2.5">
+          <div class="flex-1">
+            <label for="nTop" class="block text-[13px] mb-[5px] text-clay-sand">{{ t('faces.nTop') }}</label>
+            <div class="relative flex items-center">
+              <input id="nTop" type="number" min="0" max="24" step="1"
+                :value="nTop"
+                @input="nTop = $event.target.valueAsNumber"
+                @keydown="onStepKey($event, v => nTop = v)"
+                class="field-input !pr-[11px]" />
+            </div>
+          </div>
+          <div class="flex-1">
+            <label for="nBot" class="block text-[13px] mb-[5px] text-clay-sand">{{ t('faces.nBot') }}</label>
+            <div class="relative flex items-center">
+              <input id="nBot" type="number" min="0" max="24" step="1"
+                :value="nBot"
+                @input="nBot = $event.target.valueAsNumber"
+                @keydown="onStepKey($event, v => nBot = v)"
+                class="field-input !pr-[11px]" />
+            </div>
+          </div>
+        </div>
+        <div v-if="faceted" class="mt-[14px]">
+          <label for="rotDeg" class="block text-[13px] mb-[5px] text-clay-sand">
+            {{ t('faces.rotation') }}
+          </label>
+          <div class="relative flex items-center">
+            <input id="rotDeg" type="number" min="0" max="360" step="1"
+              :value="rotDeg"
+              @input="rotDeg = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => rotDeg = v)"
+              class="field-input" />
+            <span class="field-unit">°</span>
+          </div>
+        </div>
+        <p class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
+          {{ faceted ? t('faces.noteFaceted') : t('faces.noteRound') }}
+        </p>
+      </div>
+
       <!-- Shrink compensation -->
       <div class="mb-[22px]">
         <div class="group-lbl">{{ t('shrink.label') }}</div>
@@ -210,6 +253,11 @@ const seamOn   = defineModel('seamOn')
 const seamW    = defineModel('seamW')
 const discTop  = defineModel('discTop')
 const discBot  = defineModel('discBot')
+const nTop     = defineModel('nTop')
+const nBot     = defineModel('nBot')
+const rotDeg   = defineModel('rotDeg')
+
+const faceted = computed(() => (+nTop.value >= 3) || (+nBot.value >= 3))
 
 const props = defineProps({
   geo:        { type: Object,  required: true },
@@ -292,6 +340,17 @@ const readoutRows = computed(() => {
   const rows = []
   if (g.shrink && g.shrink.p > 0)
     rows.push([t('computed.shrinkReadout'), `${g.shrink.p} % · ×${g.shrink.k.toFixed(3)}`])
+  if (g.faceted) {
+    rows.push(
+      [t('computed.faceCount'), String(g.faceCount)],
+      [t('computed.distinct'),  String(g.faces.length)],
+      [t('computed.slant'),     `${fmt(m.L, u)} ${u}`],
+    )
+    if (g.edgeBot) rows.push([t('computed.edgeBot'), `${fmt(g.edgeBot, u)} ${u}`])
+    if (g.edgeTop) rows.push([t('computed.edgeTop'), `${fmt(g.edgeTop, u)} ${u}`])
+    if (g.approximated) rows.push([t('computed.approx'), `${g.nBot < 3 ? g.segBot : g.segTop}`])
+    return rows
+  }
   if (g.cyl) {
     rows.push(
       [t('computed.form'),   t('computed.rect')],

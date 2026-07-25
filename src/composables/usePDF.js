@@ -1,4 +1,5 @@
 import { discList, DISC_GAP } from './useGeometry.js'
+import { facetedPieces, edgeStrip } from './usePolyhedron.js'
 
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
@@ -39,6 +40,22 @@ function circlePoly(cx, cy, r) {
 function cutPolygon(g) {
   const polys = []
   const seams = []
+
+  // Faceted shapes are already flat pieces laid out in template space; the
+  // tiling below treats them like any other set of outlines.
+  if (g.faceted) {
+    facetedPieces(g, discList(g)).forEach(p => {
+      if (p.poly) polys.push(p.poly)
+      else polys.push(circlePoly(p.cx, p.cy, p.r))
+      if (p.type === 'face' && g.seam > 0) {
+        p.jointEdges.forEach(ei => {
+          const strip = edgeStrip(p.poly, ei, g.seam)
+          if (strip) seams.push(strip)
+        })
+      }
+    })
+    return { polys, seams }
+  }
 
   if (g.cyl) {
     const { W, H, seam } = g
@@ -257,6 +274,7 @@ export async function generatePDF(g, inputVals, labels) {
       [labels.shrinkNote, 9, false],
       [labels.seamNote, 9, false],
       [labels.discsNote, 9, false],
+      [labels.facetedNote, 9, false],
       [labels.slant, 9, false],
       [labels.getSize(tw, th, N), 9, false],
     ]

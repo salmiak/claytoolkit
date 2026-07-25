@@ -23,6 +23,9 @@
         v-model:seamW="state.seamW"
         v-model:discTop="state.discTop"
         v-model:discBot="state.discBot"
+        v-model:nTop="state.nTop"
+        v-model:nBot="state.nBot"
+        v-model:rotDeg="state.rotDeg"
         :geo="geo"
         :pdfLoading="pdfLoading"
         @downloadSvg="handleDownloadSvg"
@@ -67,6 +70,9 @@ const state = reactive({
   seamW: 10,
   discTop: false,
   discBot: false,
+  nTop: 0,
+  nBot: 0,
+  rotDeg: 0,
 })
 
 watch(() => state.unit, (newUnit, oldUnit) => {
@@ -92,6 +98,7 @@ const svgLabels = computed(() => ({
   cylinder: t('svg.cylinder'),
   height:   t('svg.height'),
   control:  t('svg.control'),
+  side:     t('svg.side'),
 }))
 
 const geo     = computed(() => calcGeometry(state))
@@ -164,7 +171,13 @@ async function handleDownloadPdf() {
                       return t('pdf.discs', { list })
                     })(),
     slant:          t('pdf.slant', { l: fmt(g.metrics.L, u), u }) +
-                      (!g.cyl ? t('pdf.angleNote', { deg: g.metrics.thetaDeg.toFixed(1) }) : ''),
+                      (!g.cyl && !g.faceted ? t('pdf.angleNote', { deg: g.metrics.thetaDeg.toFixed(1) }) : ''),
+    facetedNote:    g.faceted
+                      ? t('pdf.faceted', { info:
+                          `${g.nBot >= 3 ? g.nBot : '○'}/${g.nTop >= 3 ? g.nTop : '○'}` +
+                          `, ${g.faceCount} ${t('svg.side')}, ${g.faces.length} ${t('computed.distinct').toLowerCase()}` +
+                          (g.rotDeg ? `, ${g.rotDeg}°` : '') })
+                      : '',
     getSize:        (tw, th, n) => t('pdf.size', { w: fmt(tw, u), h: fmt(th, u), u, n }),
   }
   try {

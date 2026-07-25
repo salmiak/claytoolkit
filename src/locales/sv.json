@@ -45,7 +45,12 @@
     "arcBot": "Båge botten",
     "width": "Bredd (omkrets)",
     "height": "Höjd",
-    "shrinkReadout": "Krympmån (mallmått)"
+    "shrinkReadout": "Krympmån (mallmått)",
+    "faceCount": "Antal sidor",
+    "distinct": "Olika mallar",
+    "edgeBot": "Kantlängd botten",
+    "edgeTop": "Kantlängd topp",
+    "approx": "Rund ring approximerad"
   },
   "tabs": {
     "shape": "Form",
@@ -74,7 +79,8 @@
     "circ": "omkrets",
     "cylinder": "rak cylinder (lika diametrar)",
     "height": "höjd",
-    "control": "10 cm — kontrollskala"
+    "control": "10 cm — kontrollskala",
+    "side": "sida"
   },
   "pdf": {
     "title": "Konform — mall i skala 1:1",
@@ -102,11 +108,20 @@
     "angleNote": ", vinkel {deg}°",
     "size": "Mallstorlek: {w} × {h} {u}  ({n} A4-sidor)",
     "overview_label": "Översikt",
-    "pageLabel": "sida {page}/{total}"
+    "pageLabel": "sida {page}/{total}",
+    "faceted": "Facetterad: {info}"
   },
   "schematic": {
     "top": "øtopp {v}",
     "bot": "øbotten {v}",
     "height": "höjd {v}"
+  },
+  "faces": {
+    "label": "Hörn (facetterad form)",
+    "nTop": "Hörn topp",
+    "nBot": "Hörn botten",
+    "rotation": "Vrid toppen",
+    "noteRound": "0–2 hörn = rund form. Ange 3 eller fler för att göra formen facetterad.",
+    "noteFaceted": "Diametern mäts över hörnen. Mallen visar varje sida en gång med antal att klippa."
   }
 }

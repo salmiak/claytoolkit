@@ -45,7 +45,12 @@
     "arcBot": "Arc bottom",
     "width": "Width (circumference)",
     "height": "Height",
-    "shrinkReadout": "Shrinkage (template size)"
+    "shrinkReadout": "Shrinkage (template size)",
+    "faceCount": "Number of sides",
+    "distinct": "Distinct templates",
+    "edgeBot": "Edge length bottom",
+    "edgeTop": "Edge length top",
+    "approx": "Round ring approximated"
   },
   "tabs": {
     "shape": "Shape",
@@ -74,7 +79,8 @@
     "circ": "circumference",
     "cylinder": "straight cylinder (equal diameters)",
     "height": "height",
-    "control": "10 cm — check scale"
+    "control": "10 cm — check scale",
+    "side": "side"
   },
   "pdf": {
     "title": "Konform — template 1:1 scale",
@@ -102,11 +108,20 @@
     "angleNote": ", angle {deg}°",
     "size": "Template size: {w} × {h} {u}  ({n} A4 pages)",
     "overview_label": "Overview",
-    "pageLabel": "page {page}/{total}"
+    "pageLabel": "page {page}/{total}",
+    "faceted": "Faceted: {info}"
   },
   "schematic": {
     "top": "øtop {v}",
     "bot": "øbottom {v}",
     "height": "height {v}"
+  },
+  "faces": {
+    "label": "Corners (faceted shape)",
+    "nTop": "Corners top",
+    "nBot": "Corners bottom",
+    "rotation": "Rotate top",
+    "noteRound": "0–2 corners = round. Enter 3 or more to make the shape faceted.",
+    "noteFaceted": "Diameter is measured across the corners. The template shows each side once with how many to cut."
   }
 }

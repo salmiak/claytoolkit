@@ -1,3 +1,5 @@
+import { facetedSolution, facetedPieces, edgeStrip, PIECE_GAP } from './usePolyhedron.js'
+
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
 
@@ -45,6 +47,40 @@ function drawDiscs(g, bb, track, unit, labels) {
   return s
 }
 
+// Every faceted piece, labelled with how many to cut. Seam allowance goes on
+// the joint edges only — the edges that meet a neighbouring face.
+function drawFaceted(g, bb, track, unit, labels) {
+  const pieces = facetedPieces(g, discList(g))
+  let s = ''
+  pieces.forEach(p => {
+    if (p.type === 'face') {
+      if (g.seam > 0) {
+        p.jointEdges.forEach(ei => {
+          const strip = edgeStrip(p.poly, ei, g.seam)
+          if (!strip) return
+          strip.forEach(track)
+          s += `<path class="seam" d="M ${strip.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+        })
+      }
+      s += `<path class="cut-fill" d="M ${p.poly.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+      p.poly.forEach(track)
+      s += `<text class="lbl-txt" x="${n(p.cx)}" y="${n(p.cy)}" text-anchor="middle">` +
+           `${labels.side} ×${p.count}</text>`
+    } else if (p.n >= 3) {
+      s += `<path class="cut-fill" d="M ${p.poly.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+      p.poly.forEach(track)
+      s += `<text class="lbl-txt" x="${n(p.cx)}" y="${n(p.cy)}" text-anchor="middle">` +
+           `${p.key === 'bot' ? labels.bot : labels.top} ⌀${fmt(p.r * 2, unit)} ${unit}</text>`
+    } else {
+      s += `<circle class="cut-fill" cx="${n(p.cx)}" cy="${n(p.cy)}" r="${n(p.r)}"/>`
+      track({ x: p.ox, y: p.oy }); track({ x: p.ox + p.r * 2, y: p.oy + p.r * 2 })
+      s += `<text class="lbl-txt" x="${n(p.cx)}" y="${n(p.cy)}" text-anchor="middle">` +
+           `${p.key === 'bot' ? labels.bot : labels.top} ⌀${fmt(p.r * 2, unit)} ${unit}</text>`
+    }
+  })
+  return s
+}
+
 function ruler(bb, x0, labels) {
   const y = bb.maxy + 9
   const x = x0 === Infinity ? 0 : x0
@@ -66,7 +102,7 @@ function finalize(inner, bb, pad) {
   return { inner, vb: `${n(x)} ${n(y)} ${n(w)} ${n(h)}`, w: n(w), h: n(h) }
 }
 
-export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot }) {
+export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0 }) {
   const f = unit === 'cm' ? 10 : 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
@@ -85,6 +121,21 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   // Discs are cut at the given diameter, shrink-scaled like the wall but with no
   // seam allowance — a disc has no vertical joint to overlap.
   const discs = { top: !!discTop, bot: !!discBot }
+
+  // Any faceted ring takes the polyhedral path; two round rings keep the
+  // original cone/cylinder unrolling, which is exact and far more compact.
+  if (nTop >= 3 || nBot >= 3) {
+    const sol = facetedSolution({ nTop, nBot, rTop, rBot, h, rotDeg })
+    return {
+      ok: true, faceted: true, cyl: false, ...sol,
+      seam, rTop, rBot, h, nTop, nBot, rotDeg, discs, shrink: { p: sp, k },
+      metrics: {
+        L: sol.faces.length ? Math.max(...sol.faces.map(f => f.hh)) : 0,
+        Ri: null, Ro: null, thetaDeg: null,
+        arcTop: TAU * rTop, arcBot: TAU * rBot,
+      },
+    }
+  }
 
   if (dR < 1e-6) {
     const W = TAU * Rbig
@@ -112,11 +163,13 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
 
 // Discs to include, largest first so the row below the wall packs tightly.
 // Shared by the SVG and PDF paths so both cut the same set.
+// `n` is the corner count for that ring: 0 means a round disc, 3+ a polygon
+// matching the faceted wall.
 export function discList(g) {
   if (!g.ok || !g.discs) return []
   const out = []
-  if (g.discs.bot && g.rBot > 0) out.push({ key: 'bot', r: g.rBot })
-  if (g.discs.top && g.rTop > 0) out.push({ key: 'top', r: g.rTop })
+  if (g.discs.bot && g.rBot > 0) out.push({ key: 'bot', r: g.rBot, n: g.nBot >= 3 ? g.nBot : 0 })
+  if (g.discs.top && g.rTop > 0) out.push({ key: 'top', r: g.rTop, n: g.nTop >= 3 ? g.nTop : 0 })
   return out.sort((a, b) => b.r - a.r)
 }
 
@@ -130,6 +183,12 @@ export function buildTemplate(g, unit, labels) {
   const track = p => {
     bb.minx = Math.min(bb.minx, p.x); bb.miny = Math.min(bb.miny, p.y)
     bb.maxx = Math.max(bb.maxx, p.x); bb.maxy = Math.max(bb.maxy, p.y)
+  }
+
+  if (g.faceted) {
+    inner += drawFaceted(g, bb, track, unit, labels)
+    inner += ruler(bb, bb.minx, labels)
+    return finalize(inner, bb, pad)
   }
 
   if (g.cyl) {

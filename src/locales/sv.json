@@ -63,14 +63,18 @@
   "tabs": {
     "shape": "Form",
     "calc": "Beräkningar",
-    "export": "Export"
+    "export": "Export",
+    "template": "Mall"
   },
   "actions": {
     "pdf": "Ladda ner PDF (A4, flera sidor)",
     "pdfShort": "Ladda ner PDF",
     "svg": "Ladda ner SVG (1:1)",
     "print": "Skriv ut mallen",
-    "pdfCreating": "Skapar PDF…"
+    "pdfCreating": "Skapar PDF…",
+    "swapViews": "Byt plats på vyerna",
+    "show3d": "3D",
+    "showTemplate": "Mall"
   },
   "canvas": {
     "empty": "Ange två diametrar och en höjd större än noll så ritas mallen här.",

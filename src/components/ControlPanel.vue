@@ -201,12 +201,21 @@
         <!-- Shape -->
         <div v-show="!isDesktop || activeTab === 'shape'" :class="isDesktop ? '' : 'mb-[22px]'">
           <div v-if="!isDesktop" class="group-lbl">{{ t('shape.label') }}</div>
-          <ShapeWireframe
-            :geo="geo"
-            :label="t('shape.label')"
-            :hint="t('shape.dragHint')"
-            :emptyLabel="t('shape.empty')"
-          />
+          <div class="h-[190px]">
+            <ShapeWireframe
+              v-if="bigView === 'template'"
+              :geo="geo"
+              :label="t('shape.label')"
+              :hint="t('shape.dragHint')"
+              :emptyLabel="t('shape.empty')"
+            />
+            <TemplateSheet
+              v-else
+              :svgHtml="svgHtml"
+              :aspect="aspect"
+              :emptyLabel="t('canvas.empty')"
+            />
+          </div>
         </div>
 
         <!-- Calculations -->
@@ -254,6 +263,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fmt } from '../composables/useGeometry.js'
 import ShapeWireframe from './ShapeWireframe.vue'
+import TemplateSheet from './TemplateSheet.vue'
 import { useMediaQuery } from '../composables/useMediaQuery.js'
 
 const { t } = useI18n()
@@ -263,7 +273,7 @@ const isDesktop = useMediaQuery('(min-width: 768px)')
 const activeTab = ref('shape')
 
 const tabs = computed(() => [
-  { id: 'shape',  label: t('tabs.shape') },
+  { id: 'shape',  label: bigView.value === 'template' ? t('tabs.shape') : t('tabs.template') },
   { id: 'calc',   label: t('tabs.calc') },
   { id: 'export', label: t('tabs.export') },
 ])
@@ -298,7 +308,12 @@ const columns = computed(() => [
 const props = defineProps({
   geo:        { type: Object,  required: true },
   pdfLoading: { type: Boolean, default: false },
+  svgHtml:    { type: String,  default: null },
+  aspect:     { type: Number,  default: 1 },
+  // Which view the big pane holds; this slot shows the other one.
+  bigView:    { type: String,  default: 'template' },
 })
+const bigView = computed(() => props.bigView)
 
 defineEmits(['downloadSvg', 'downloadPdf', 'print'])
 

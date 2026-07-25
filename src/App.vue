@@ -30,6 +30,9 @@
         v-model:roundBot="state.roundBot"
         :geo="geo"
         :pdfLoading="pdfLoading"
+        :svgHtml="svgHtml"
+        :aspect="aspect"
+        :bigView="bigView"
         @downloadSvg="handleDownloadSvg"
         @downloadPdf="handleDownloadPdf"
         @print="handlePrint"
@@ -37,9 +40,12 @@
       <TemplateCanvas
         :svgHtml="svgHtml"
         :aspect="aspect"
+        :geo="geo"
+        :view="bigView"
         :pdfLoading="pdfLoading"
         :disabled="!geo.ok"
         @downloadPdf="handleDownloadPdf"
+        @swapViews="bigView = bigView === 'template' ? 'shape' : 'template'"
       />
     </main>
 
@@ -159,6 +165,9 @@ function handlePrint() {
   el.style.display = 'none'
   el.innerHTML = ''
 }
+
+// Which view gets the large pane; the sidebar slot shows the other.
+const bigView = ref('template')
 
 const pdfLoading = ref(false)
 

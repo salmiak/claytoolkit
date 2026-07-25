@@ -1,8 +1,8 @@
 <template>
   <div
     ref="host"
-    class="relative bg-frame-3 border border-frame-line rounded-[9px] overflow-hidden
-           touch-none select-none"
+    class="relative w-full h-full bg-frame-3 border border-frame-line rounded-[9px]
+           overflow-hidden touch-none select-none"
     :class="segments.length ? 'cursor-grab active:cursor-grabbing' : ''"
     @pointerdown="onDown"
     @pointermove="onMove"
@@ -10,13 +10,20 @@
     @pointercancel="onUp"
     @dblclick="reset"
   >
-    <svg :viewBox="`0 0 ${W} ${H}`" class="w-full h-auto block" :aria-label="label">
+    <svg
+      v-if="box.w"
+      :viewBox="`0 0 ${box.w} ${box.h}`"
+      :width="box.w"
+      :height="box.h"
+      class="block"
+      :aria-label="label"
+    >
       <line
         v-for="(s, i) in segments"
         :key="i"
         :x1="s.a.x" :y1="s.a.y" :x2="s.b.x" :y2="s.b.y"
         :stroke="s.kind === 'ring' ? '#E4D6C3' : s.kind === 'seam' ? '#7C9473' : '#6B4A36'"
-        :stroke-width="s.kind === 'hint' ? 0.7 : 1.1"
+        :stroke-width="s.kind === 'hint' ? 0.7 : 1.2"
         :stroke-opacity="0.25 + 0.75 * s.depth"
         stroke-linecap="round"
       />
@@ -27,17 +34,15 @@
       {{ emptyLabel }}
     </p>
     <p v-else-if="!touched"
-       class="absolute left-2 bottom-1.5 text-[10px] text-clay-fired pointer-events-none">
+       class="absolute left-2.5 bottom-2 text-[10px] text-clay-fired pointer-events-none">
       {{ hint }}
     </p>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { buildWireframe, projectWireframe } from '../composables/useWireframe.js'
-
-const W = 300, H = 190
 
 const props = defineProps({
   geo:        { type: Object, required: true },
@@ -52,11 +57,28 @@ const el = ref(DEFAULT_EL)
 const touched = ref(false)
 
 const host = ref(null)
+// The view box tracks the container, so the projection fits whatever space this
+// is given — the small sidebar slot or the full preview pane.
+const box = ref({ w: 0, h: 0 })
 let drag = null
+let ro = null
+
+function measure() {
+  const e = host.value
+  if (e) box.value = { w: e.clientWidth, h: e.clientHeight }
+}
+
+onMounted(() => {
+  measure()
+  ro = new ResizeObserver(measure)
+  ro.observe(host.value)
+})
+onUnmounted(() => { ro?.disconnect(); drag = null })
 
 const model = computed(() => buildWireframe(props.geo))
-const segments = computed(() =>
-  projectWireframe(model.value, { az: az.value, el: el.value, w: W, h: H }))
+const segments = computed(() => box.value.w
+  ? projectWireframe(model.value, { az: az.value, el: el.value, w: box.value.w, h: box.value.h, pad: 18 })
+  : [])
 
 function onDown(e) {
   if (!segments.value.length) return
@@ -83,6 +105,4 @@ function reset() {
   az.value = DEFAULT_AZ
   el.value = DEFAULT_EL
 }
-
-onUnmounted(() => { drag = null })
 </script>

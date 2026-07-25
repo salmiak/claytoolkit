@@ -63,14 +63,18 @@
   "tabs": {
     "shape": "Shape",
     "calc": "Calculations",
-    "export": "Export"
+    "export": "Export",
+    "template": "Template"
   },
   "actions": {
     "pdf": "Download PDF (A4, multi-page)",
     "pdfShort": "Download PDF",
     "svg": "Download SVG (1:1)",
     "print": "Print template",
-    "pdfCreating": "Generating PDF…"
+    "pdfCreating": "Generating PDF…",
+    "swapViews": "Swap the two views",
+    "show3d": "3D",
+    "showTemplate": "Template"
   },
   "canvas": {
     "empty": "Enter two diameters and a height greater than zero to draw the template.",

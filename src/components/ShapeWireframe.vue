@@ -1,9 +1,13 @@
 <template>
   <div
     ref="host"
-    class="relative w-full h-full bg-frame-3 border border-frame-line rounded-[9px]
-           overflow-hidden touch-none select-none"
-    :class="segments.length ? 'cursor-grab active:cursor-grabbing' : ''"
+    class="relative w-full h-full overflow-hidden touch-none select-none"
+    :class="[
+      segments.length ? 'cursor-grab active:cursor-grabbing' : '',
+      // Framed in the sidebar slot, where it needs an edge against the panel;
+      // bare when it fills the preview pane, which supplies its own background.
+      bare ? '' : 'bg-frame-3 border border-frame-line rounded-[9px]',
+    ]"
     @pointerdown="onDown"
     @pointermove="onMove"
     @pointerup="onUp"
@@ -49,6 +53,7 @@ const props = defineProps({
   label:      { type: String, default: '' },
   hint:       { type: String, default: '' },
   emptyLabel: { type: String, default: '' },
+  bare:       { type: Boolean, default: false },
 })
 
 const DEFAULT_AZ = -0.55, DEFAULT_EL = 0.32

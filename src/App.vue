@@ -26,6 +26,8 @@
         v-model:nTop="state.nTop"
         v-model:nBot="state.nBot"
         v-model:rotDeg="state.rotDeg"
+        v-model:roundTop="state.roundTop"
+        v-model:roundBot="state.roundBot"
         :geo="geo"
         :pdfLoading="pdfLoading"
         @downloadSvg="handleDownloadSvg"
@@ -70,9 +72,11 @@ const state = reactive({
   seamW: 10,
   discTop: false,
   discBot: false,
-  nTop: 0,
-  nBot: 0,
+  nTop: 4,
+  nBot: 4,
   rotDeg: 0,
+  roundTop: true,
+  roundBot: true,
 })
 
 watch(() => state.unit, (newUnit, oldUnit) => {
@@ -101,7 +105,17 @@ const svgLabels = computed(() => ({
   side:     t('svg.side'),
 }))
 
-const geo     = computed(() => calcGeometry(state))
+// A ticked Round box means that ring has no corners, which is what
+// calcGeometry already treats as round. Faceted counts are floored at 3 here
+// rather than while typing: min="3" doesn't stop someone entering 1, and a
+// count below 3 would quietly turn the ring round while its box says otherwise.
+const corners = (isRound, v) => isRound ? 0 : Math.max(3, +v || 3)
+
+const geo = computed(() => calcGeometry({
+  ...state,
+  nTop: corners(state.roundTop, state.nTop),
+  nBot: corners(state.roundBot, state.nBot),
+}))
 const tpl     = computed(() => geo.value.ok ? buildTemplate(geo.value, state.unit, svgLabels.value) : null)
 const svgHtml = computed(() => tpl.value ? svgString(tpl.value, false) : null)
 

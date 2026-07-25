@@ -19,65 +19,84 @@
         </div>
       </div>
 
-      <!-- Dimension fields -->
+      <!-- Dimensions: top and bottom side by side, height below -->
       <div class="mb-[22px]">
         <div class="group-lbl">{{ t('dims.label') }}</div>
-        <div v-for="field in dimFields" :key="field.key" class="mb-[14px]">
-          <label :for="field.key" class="block text-[13px] mb-[5px] text-clay-sand">
-            {{ field.label }} <small class="text-clay-terracotta">{{ field.hint }}</small>
-          </label>
+
+        <div class="grid grid-cols-2 gap-x-2.5">
+          <div v-for="col in columns" :key="col.side" class="min-w-0">
+            <div class="text-[11px] uppercase tracking-[0.08em] text-clay-terracotta font-semibold mb-2">
+              {{ col.heading }}
+            </div>
+
+            <label :for="col.dId" class="block text-[12px] mb-[4px] text-clay-sand">
+              {{ t('dims.diameter') }}
+            </label>
+            <div class="relative flex items-center mb-2.5">
+              <input
+                :id="col.dId"
+                type="number" min="0" step="1"
+                :value="col.d.value"
+                @input="col.d.value = $event.target.valueAsNumber"
+                @keydown="onStepKey($event, v => col.d.value = v)"
+                class="field-input field-narrow"
+              />
+              <span class="field-unit">{{ unit }}</span>
+            </div>
+
+            <label :for="col.nId" class="block text-[12px] mb-[4px]"
+                   :class="col.round.value ? 'text-clay-terracotta' : 'text-clay-sand'">
+              {{ t('faces.corners') }}
+            </label>
+            <div class="relative flex items-center">
+              <input
+                :id="col.nId"
+                type="number" min="3" max="24" step="1"
+                :value="col.n.value"
+                :disabled="col.round.value"
+                @input="col.n.value = $event.target.valueAsNumber"
+                @keydown="onStepKey($event, v => col.n.value = v)"
+                class="field-input field-narrow !pr-[11px]"
+              />
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <input :id="col.rId" type="checkbox" v-model="col.round.value"
+                     class="w-[15px] h-[15px] accent-sage shrink-0" />
+              <label :for="col.rId" class="text-[12px] text-clay-sand">{{ t('faces.round') }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-[14px] w-1/2 pr-1.5">
+          <label for="h" class="block text-[12px] mb-[4px] text-clay-sand">{{ t('dims.height') }}</label>
           <div class="relative flex items-center">
             <input
-              :id="field.key"
-              type="number" min="0" step="1"
-              :value="field.model.value"
-              @input="field.model.value = $event.target.valueAsNumber"
-              @keydown="onStepKey($event, v => field.model.value = v)"
-              class="field-input"
+              id="h" type="number" min="0" step="1"
+              :value="h"
+              @input="h = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => h = v)"
+              class="field-input field-narrow"
             />
             <span class="field-unit">{{ unit }}</span>
           </div>
         </div>
-      </div>
 
-      <!-- Faces -->
-      <div class="mb-[22px]">
-        <div class="group-lbl">{{ t('faces.label') }}</div>
-        <div class="flex gap-2.5">
-          <div class="flex-1">
-            <label for="nTop" class="block text-[13px] mb-[5px] text-clay-sand">{{ t('faces.nTop') }}</label>
-            <div class="relative flex items-center">
-              <input id="nTop" type="number" min="0" max="24" step="1"
-                :value="nTop"
-                @input="nTop = $event.target.valueAsNumber"
-                @keydown="onStepKey($event, v => nTop = v)"
-                class="field-input !pr-[11px]" />
-            </div>
-          </div>
-          <div class="flex-1">
-            <label for="nBot" class="block text-[13px] mb-[5px] text-clay-sand">{{ t('faces.nBot') }}</label>
-            <div class="relative flex items-center">
-              <input id="nBot" type="number" min="0" max="24" step="1"
-                :value="nBot"
-                @input="nBot = $event.target.valueAsNumber"
-                @keydown="onStepKey($event, v => nBot = v)"
-                class="field-input !pr-[11px]" />
-            </div>
-          </div>
-        </div>
-        <div v-if="faceted" class="mt-[14px]">
-          <label for="rotDeg" class="block text-[13px] mb-[5px] text-clay-sand">
+        <div v-if="faceted" class="mt-[14px] w-1/2 pr-1.5">
+          <label for="rotDeg" class="block text-[12px] mb-[4px] text-clay-sand">
             {{ t('faces.rotation') }}
           </label>
           <div class="relative flex items-center">
-            <input id="rotDeg" type="number" min="0" max="360" step="1"
+            <input
+              id="rotDeg" type="number" min="0" max="360" step="1"
               :value="rotDeg"
               @input="rotDeg = $event.target.valueAsNumber"
               @keydown="onStepKey($event, v => rotDeg = v)"
-              class="field-input" />
+              class="field-input field-narrow"
+            />
             <span class="field-unit">°</span>
           </div>
         </div>
+
         <p class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
           {{ faceted ? t('faces.noteFaceted') : t('faces.noteRound') }}
         </p>
@@ -256,8 +275,19 @@ const discBot  = defineModel('discBot')
 const nTop     = defineModel('nTop')
 const nBot     = defineModel('nBot')
 const rotDeg   = defineModel('rotDeg')
+const roundTop = defineModel('roundTop')
+const roundBot = defineModel('roundBot')
 
-const faceted = computed(() => (+nTop.value >= 3) || (+nBot.value >= 3))
+// A ring is round when its box is ticked; its corner count is kept meanwhile so
+// unticking restores the previous value rather than resetting it.
+const faceted = computed(() => !roundTop.value || !roundBot.value)
+
+const columns = computed(() => [
+  { side: 'top', heading: t('dims.colTop'), dId: 'dTop', nId: 'nTop', rId: 'roundTop',
+    d: dTop, n: nTop, round: roundTop },
+  { side: 'bot', heading: t('dims.colBot'), dId: 'dBot', nId: 'nBot', rId: 'roundBot',
+    d: dBot, n: nBot, round: roundBot },
+])
 
 const props = defineProps({
   geo:        { type: Object,  required: true },
@@ -266,11 +296,6 @@ const props = defineProps({
 
 defineEmits(['downloadSvg', 'downloadPdf', 'print'])
 
-const dimFields = computed(() => [
-  { key: 'dTop', label: t('dims.dTop'), hint: t('dims.dTopHint'), model: dTop },
-  { key: 'dBot', label: t('dims.dBot'), hint: t('dims.dBotHint'), model: dBot },
-  { key: 'h',    label: t('dims.height'), hint: t('dims.heightHint'), model: h },
-])
 
 // Shift + Up/Down jumps ten steps, as most editors do. Browsers don't do this
 // for number inputs, so it is handled here; the plain arrow keys stay native.
@@ -381,8 +406,12 @@ const readoutRows = computed(() => {
   @apply focus:outline-none focus:ring-2 focus:ring-sage focus:border-sage;
   @apply disabled:opacity-40;
 }
+/* Values are rarely more than three digits, so the fields can be tighter. */
+.field-narrow {
+  @apply py-2 pr-[32px] pl-[9px] text-[14px];
+}
 .field-unit {
-  @apply absolute right-[11px] text-ink-soft font-mono text-[12px] pointer-events-none;
+  @apply absolute right-[9px] text-ink-soft font-mono text-[12px] pointer-events-none;
 }
 .readout-k {
   @apply text-[10.5px] uppercase tracking-[0.06em] text-clay-terracotta;

@@ -12,7 +12,10 @@
     "dBot": "Bottom diameter",
     "dBotHint": "(base/bottom)",
     "height": "Height",
-    "heightHint": "(vertical)"
+    "heightHint": "(vertical)",
+    "colTop": "Top",
+    "colBot": "Bottom",
+    "diameter": "Diameter"
   },
   "shrink": {
     "label": "Shrinkage",
@@ -121,7 +124,9 @@
     "nTop": "Corners top",
     "nBot": "Corners bottom",
     "rotation": "Rotate top",
-    "noteRound": "0–2 corners = round. Enter 3 or more to make the shape faceted.",
-    "noteFaceted": "Diameter is measured across the corners. The template shows each side once with how many to cut."
+    "noteRound": "Round shape. Untick Round to give a ring corners.",
+    "noteFaceted": "Diameter is measured across the corners. The template shows each side once with how many to cut.",
+    "corners": "Corners",
+    "round": "Round"
   }
 }

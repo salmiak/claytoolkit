@@ -12,7 +12,10 @@
     "dBot": "Undre diameter",
     "dBotHint": "(bas/botten)",
     "height": "Höjd",
-    "heightHint": "(lodrätt)"
+    "heightHint": "(lodrätt)",
+    "colTop": "Topp",
+    "colBot": "Botten",
+    "diameter": "Diameter"
   },
   "shrink": {
     "label": "Krympmån",
@@ -121,7 +124,9 @@
     "nTop": "Hörn topp",
     "nBot": "Hörn botten",
     "rotation": "Vrid toppen",
-    "noteRound": "0–2 hörn = rund form. Ange 3 eller fler för att göra formen facetterad.",
-    "noteFaceted": "Diametern mäts över hörnen. Mallen visar varje sida en gång med antal att klippa."
+    "noteRound": "Rund form. Avmarkera Rund för att ge en ring hörn.",
+    "noteFaceted": "Diametern mäts över hörnen. Mallen visar varje sida en gång med antal att klippa.",
+    "corners": "Hörn",
+    "round": "Rund"
   }
 }

@@ -264,6 +264,8 @@ export const SVG_STYLE = `
   .ruler-txt{fill:#241F1C;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3.6px}`
 
 export function svgString(t, physical) {
-  const size = physical ? `width="${t.w}mm" height="${t.h}mm"` : `width="100%"`
+  // On screen the sheet is sized for us, so fill it in both axes; exports keep
+  // real millimetre dimensions for 1:1 printing.
+  const size = physical ? `width="${t.w}mm" height="${t.h}mm"` : `width="100%" height="100%"`
   return `<svg xmlns="http://www.w3.org/2000/svg" ${size} viewBox="${t.vb}"><style>${SVG_STYLE}</style>${t.inner}</svg>`
 }

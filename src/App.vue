@@ -42,6 +42,7 @@
         :aspect="aspect"
         :geo="geo"
         :view="bigView"
+        :rulerLen="rulerLen"
         :pdfLoading="pdfLoading"
         :disabled="!geo.ok"
         @downloadPdf="handleDownloadPdf"
@@ -59,7 +60,7 @@ import { storeLocale } from './locale.js'
 import { useI18n } from 'vue-i18n'
 import ControlPanel from './components/ControlPanel.vue'
 import TemplateCanvas from './components/TemplateCanvas.vue'
-import { calcGeometry, buildTemplate, svgString, fmt, discList } from './composables/useGeometry.js'
+import { calcGeometry, buildTemplate, svgString, fmt, discList, convertUnit, rulerSpec } from './composables/useGeometry.js'
 import { generatePDF } from './composables/usePDF.js'
 
 const { t, locale } = useI18n()
@@ -86,18 +87,18 @@ const state = reactive({
   roundBot: true,
 })
 
+// Keep the physical size when the unit changes, rather than reinterpreting the
+// number. Goes through millimetres so any pair of units works.
 watch(() => state.unit, (newUnit, oldUnit) => {
   if (newUnit === oldUnit) return
-  const convert = v => {
-    const num = +v
-    if (isNaN(num)) return v
-    return newUnit === 'cm' ? +(num / 10).toFixed(2) : Math.round(num * 10)
-  }
-  state.dTop = convert(state.dTop)
-  state.dBot = convert(state.dBot)
-  state.h = convert(state.h)
-  state.seamW = convert(state.seamW)
+  const c = v => convertUnit(v, oldUnit, newUnit)
+  state.dTop = c(state.dTop)
+  state.dBot = c(state.dBot)
+  state.h = c(state.h)
+  state.seamW = c(state.seamW)
 })
+
+const rulerLen = computed(() => rulerSpec(state.unit).text)
 
 const svgLabels = computed(() => ({
   slant:    t('svg.slant'),
@@ -108,7 +109,7 @@ const svgLabels = computed(() => ({
   circ:     t('svg.circ'),
   cylinder: t('svg.cylinder'),
   height:   t('svg.height'),
-  control:  t('svg.control'),
+  control:  t('svg.control', { len: rulerLen.value }),
   side:     t('svg.side'),
 }))
 
@@ -190,7 +191,7 @@ async function handleDownloadPdf() {
     step6:          t('pdf.step6'),
     getTape:        page          => t('pdf.tape', { page }),
     legend:         t('pdf.legend'),
-    control:        t('pdf.control'),
+    control:        t('pdf.control', { len: rulerLen.value }),
     overview_label: t('pdf.overview_label'),
     getPageLabel:   (page, total) => t('pdf.pageLabel', { page, total }),
     finalDim:       t('pdf.finalDim', { top: state.dTop, bot: state.dBot, h: state.h, u }),

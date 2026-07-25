@@ -11,10 +11,10 @@
         <div class="group-lbl">{{ t('unit.label') }}</div>
         <div class="flex border border-frame-line rounded-[7px] overflow-hidden w-max">
           <button
-            v-for="u in ['mm','cm']"
+            v-for="u in UNITS"
             :key="u"
             @click="unit = u"
-            :class="['font-mono text-[13px] px-4 py-1.5 transition-colors', unit === u ? 'bg-sage text-ink' : 'bg-transparent text-clay-terracotta hover:text-clay-bisque']"
+            :class="['font-mono text-[13px] px-3 py-1.5 transition-colors', unit === u ? 'bg-sage text-ink' : 'bg-transparent text-clay-terracotta hover:text-clay-bisque']"
           >{{ u }}</button>
         </div>
       </div>
@@ -43,7 +43,7 @@
             <div class="relative flex items-center mb-2.5">
               <input
                 :id="col.dId"
-                type="number" min="0" step="1"
+                type="number" min="0" :step="stepFor"
                 :value="col.d.value"
                 @input="col.d.value = $event.target.valueAsNumber"
                 @keydown="onStepKey($event, v => col.d.value = v)"
@@ -74,7 +74,7 @@
           <label for="h" class="block text-[12px] mb-[4px] text-clay-sand">{{ t('dims.height') }}</label>
           <div class="relative flex items-center">
             <input
-              id="h" type="number" min="0" step="1"
+              id="h" type="number" min="0" :step="stepFor"
               :value="h"
               @input="h = $event.target.valueAsNumber"
               @keydown="onStepKey($event, v => h = v)"
@@ -136,7 +136,7 @@
           <label for="seamOn" class="text-[13px] text-clay-sand flex-1">{{ t('seam.toggle') }}</label>
           <div class="relative w-24">
             <input
-              type="number" min="0" step="1"
+              type="number" min="0" :step="stepFor"
               :value="seamW"
               @input="seamW = $event.target.valueAsNumber"
               @keydown="onStepKey($event, v => seamW = v)"
@@ -226,7 +226,7 @@
               :geo="geo"
               :unit="unit"
               :label="t('tabs.size')"
-              :bananaLabel="t('size.banana')"
+              :bananaLabel="t('size.banana', { len: bananaLen })"
               :emptyLabel="t('shape.empty')"
             />
           </div>
@@ -275,7 +275,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { fmt } from '../composables/useGeometry.js'
+import { fmt, UNITS, STEP } from '../composables/useGeometry.js'
 import ShapeWireframe from './ShapeWireframe.vue'
 import TemplateSheet from './TemplateSheet.vue'
 import SizeProfile from './SizeProfile.vue'
@@ -313,6 +313,10 @@ const roundBot = defineModel('roundBot')
 // A ring is round when its box is ticked; its corner count is kept meanwhile so
 // unticking restores the previous value rather than resetting it.
 const faceted = computed(() => !roundTop.value || !roundBot.value)
+const stepFor = computed(() => STEP[unit.value] ?? 1)
+// The banana is ~18 cm whatever the user measures in, so quote it in their unit.
+const bananaLen = computed(() =>
+  unit.value === 'in' ? '~7 in' : unit.value === 'cm' ? '~18 cm' : '~180 mm')
 
 const columns = computed(() => [
   { side: 'top', heading: t('dims.colTop'), dId: 'dTop', nId: 'nTop', rId: 'roundTop',

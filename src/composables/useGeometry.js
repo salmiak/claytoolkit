@@ -3,9 +3,43 @@ import { facetedSolution, facetedPieces, edgeStrip, PIECE_GAP } from './usePolyh
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
 
-export function fmt(mm, unit, dec = 1) {
-  const v = unit === 'cm' ? mm / 10 : mm
-  return v.toFixed(unit === 'cm' ? dec + (Math.abs(v) < 10 ? 1 : 0) : 0)
+// Single source of truth for units. Geometry is computed in millimetres
+// throughout; these only govern what goes in and what is displayed.
+export const UNITS = ['mm', 'cm', 'in']
+export const MM_PER_UNIT = { mm: 1, cm: 10, in: 25.4 }
+// Enough digits to be useful at each unit's magnitude: whole millimetres, and
+// hundredths of an inch (0.01in is a quarter of a millimetre).
+const DECIMALS = { mm: 0, cm: 1, in: 2 }
+// Arrow-key increment. An inch a press would be far too coarse.
+export const STEP = { mm: 1, cm: 1, in: 0.25 }
+
+export function fmt(mm, unit) {
+  const v = mm / (MM_PER_UNIT[unit] || 1)
+  const d = DECIMALS[unit] ?? 0
+  // Centimetres gain a digit below 10, where one decimal loses too much.
+  return v.toFixed(unit === 'cm' && Math.abs(v) < 10 ? d + 1 : d)
+}
+
+export function toMm(value, unit) {
+  return (+value || 0) * (MM_PER_UNIT[unit] || 1)
+}
+
+// Convert a displayed value between units, rounded to that unit's precision so
+// switching back and forth doesn't accumulate noise.
+export function convertUnit(value, from, to) {
+  const num = +value
+  if (isNaN(num)) return value
+  const mm = num * (MM_PER_UNIT[from] || 1)
+  const out = mm / (MM_PER_UNIT[to] || 1)
+  return +out.toFixed(to === 'mm' ? 0 : 2)
+}
+
+// The printed control ruler, in the reader's own units — an inch user should be
+// able to check print scale with an inch rule.
+export function rulerSpec(unit) {
+  return unit === 'in'
+    ? { mm: 101.6, major: 25.4, minor: 25.4 / 4, text: '4 in' }
+    : { mm: 100, major: 50, minor: 10, text: '10 cm' }
 }
 
 // Point on annular sector: phi is half-angle from downward bisector
@@ -81,16 +115,20 @@ function drawFaceted(g, bb, track, unit, labels) {
   return s
 }
 
-function ruler(bb, x0, labels) {
+function ruler(bb, x0, labels, unit) {
+  const { mm: L, major, minor } = rulerSpec(unit)
   const y = bb.maxy + 9
   const x = x0 === Infinity ? 0 : x0
-  let s = `<line class="ruler" x1="${n(x)}" y1="${n(y)}" x2="${n(x + 100)}" y2="${n(y)}"/>`
-  for (let i = 0; i <= 100; i += 10) {
-    const big = i % 50 === 0
-    s += `<line class="ruler" x1="${n(x + i)}" y1="${n(y)}" x2="${n(x + i)}" y2="${n(y - (big ? 3.5 : 2))}"/>`
+  let s = `<line class="ruler" x1="${n(x)}" y1="${n(y)}" x2="${n(x + L)}" y2="${n(y)}"/>`
+  // Step in whole ticks to avoid float drift landing the last tick off the end.
+  const ticks = Math.round(L / minor)
+  for (let i = 0; i <= ticks; i++) {
+    const at = i * minor
+    const big = Math.abs(at % major) < 1e-6 || Math.abs((at % major) - major) < 1e-6
+    s += `<line class="ruler" x1="${n(x + at)}" y1="${n(y)}" x2="${n(x + at)}" y2="${n(y - (big ? 3.5 : 2))}"/>`
   }
   s += `<text class="ruler-txt" x="${n(x)}" y="${n(y + 4.5)}">0</text>`
-  s += `<text class="ruler-txt" x="${n(x + 100)}" y="${n(y + 4.5)}" text-anchor="end">${labels.control}</text>`
+  s += `<text class="ruler-txt" x="${n(x + L)}" y="${n(y + 4.5)}" text-anchor="end">${labels.control}</text>`
   bb.maxy = y + 6
   return s
 }
@@ -103,7 +141,7 @@ function finalize(inner, bb, pad) {
 }
 
 export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0 }) {
-  const f = unit === 'cm' ? 10 : 1
+  const f = MM_PER_UNIT[unit] || 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
   const D1 = Math.max(0, (dTop || 0)) * f * k
@@ -187,7 +225,7 @@ export function buildTemplate(g, unit, labels) {
 
   if (g.faceted) {
     inner += drawFaceted(g, bb, track, unit, labels)
-    inner += ruler(bb, bb.minx, labels)
+    inner += ruler(bb, bb.minx, labels, unit)
     return finalize(inner, bb, pad)
   }
 
@@ -200,7 +238,7 @@ export function buildTemplate(g, unit, labels) {
     inner += `<text class="lbl-sub" x="${n(W / 2)}" y="-4" text-anchor="middle">${labels.cylinder}</text>`
     inner += heightDim(-4, 0, H, unit, labels)
     inner += drawDiscs(g, bb, track, unit, labels)
-    inner += ruler(bb, 0, labels)
+    inner += ruler(bb, 0, labels, unit)
     return finalize(inner, bb, pad)
   }
 
@@ -248,7 +286,7 @@ export function buildTemplate(g, unit, labels) {
   inner += `<text class="dim-txt" x="${n(Pol.x - 2)}" y="${n(Pol.y - 3)}" text-anchor="end">${labels.angle} ${g.metrics.thetaDeg.toFixed(1)}°</text>`
 
   inner += drawDiscs(g, bb, track, unit, labels)
-  inner += ruler(bb, bb.minx, labels)
+  inner += ruler(bb, bb.minx, labels, unit)
   return finalize(inner, bb, pad)
 }
 

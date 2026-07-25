@@ -80,7 +80,7 @@
   "canvas": {
     "empty": "Ange två diametrar och en höjd större än noll så ritas mallen här.",
     "hint": "Skala 1:1 — kontrollera med {ruler} i mallen efter utskrift. Skriv ut i {pct} (ingen \"anpassa till sida\").",
-    "hintRuler": "10 cm-linjalen",
+    "hintRuler": "{len}-linjalen",
     "hintPct": "100 %"
   },
   "svg": {
@@ -92,7 +92,7 @@
     "circ": "omkrets",
     "cylinder": "rak cylinder (lika diametrar)",
     "height": "höjd",
-    "control": "10 cm — kontrollskala",
+    "control": "{len} — kontrollskala",
     "side": "sida"
   },
   "pdf": {
@@ -109,7 +109,7 @@
     "step6": "5. Passa in kryssen (+) och tejpa på baksidan.",
     "tape": "tejp → sida {page}",
     "legend": "heldragen = klipp   ·   streckprick = tejpfog   ·   + = passmärke",
-    "control": "10 cm — kontrollskala (100 %)",
+    "control": "{len} — kontrollskala (100 %)",
     "finalDim": "Slutmått: ø{top} / ø{bot}, höjd {h} {u}",
     "shrinkNote": "Krympmån: {p} % → mall ×{k}",
     "noShrink": "Krympmån: ingen",
@@ -135,6 +135,6 @@
     "round": "Rund"
   },
   "size": {
-    "banana": "banan ~18 cm"
+    "banana": "banan {len}"
   }
 }

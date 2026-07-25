@@ -1,4 +1,4 @@
-import { discList, DISC_GAP } from './useGeometry.js'
+import { discList, DISC_GAP, rulerSpec } from './useGeometry.js'
 import { facetedPieces, edgeStrip } from './usePolyhedron.js'
 
 const TAU = Math.PI * 2
@@ -178,20 +178,27 @@ function footerLegend(doc, C, right, labels) {
   if (right) doc.text(right, C.pw - MARGIN, C.ph - 4, { align: 'right' })
 }
 
-function controlRuler(doc, x, y, labels) {
+// Drawn in the reader's own units, so an inch user can check print scale with
+// an inch rule rather than having to own a metric one.
+function controlRuler(doc, x, y, labels, spec) {
+  const { mm: L, major, minor } = spec
   stroke(doc, INK, 0.3); dset(doc, [])
-  doc.line(x, y, x + 100, y)
-  for (let i = 0; i <= 100; i += 10) {
-    doc.line(x + i, y, x + i, y - (i % 50 === 0 ? 3 : 1.8))
+  doc.line(x, y, x + L, y)
+  const ticks = Math.round(L / minor)
+  for (let i = 0; i <= ticks; i++) {
+    const at = i * minor
+    const big = Math.abs(at % major) < 1e-6 || Math.abs((at % major) - major) < 1e-6
+    doc.line(x + at, y, x + at, y - (big ? 3 : 1.8))
   }
   doc.setTextColor(...INK); doc.setFontSize(7)
   doc.text('0', x, y + 3.4)
-  doc.text(labels.control, x + 100, y + 3.4, { align: 'right' })
+  doc.text(labels.control, x + L, y + 3.4, { align: 'right' })
 }
 
 export async function generatePDF(g, inputVals, labels) {
   const { jsPDF } = await import('jspdf')
   const { unit, dTop, dBot, h: height } = inputVals
+  const spec = rulerSpec(unit)
   const { polys, seams } = cutPolygon(g)
   const raw = bboxOf([...polys, ...seams])
   const tw = raw.maxx - raw.minx, th = raw.maxy - raw.miny
@@ -284,7 +291,7 @@ export async function generatePDF(g, inputVals, labels) {
       iy += sz * 0.42 + 1.6
     })
     doc.setFont('helvetica', 'normal')
-    controlRuler(doc, MARGIN, C.oy + C.ch - 4, labels)
+    controlRuler(doc, MARGIN, C.oy + C.ch - 4, labels, spec)
     footerLegend(doc, C, labels.overview_label, labels)
     doc.addPage()
   }
@@ -340,7 +347,7 @@ export async function generatePDF(g, inputVals, labels) {
       })
     })
 
-    controlRuler(doc, C.ox, C.oy + C.ch - 3.5, labels)
+    controlRuler(doc, C.ox, C.oy + C.ch - 3.5, labels, spec)
     footerLegend(doc, C, multi ? labels.getPageLabel(pageOf[`${t.r}_${t.c}`], N) : '', labels)
   })
 

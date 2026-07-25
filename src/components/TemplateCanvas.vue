@@ -52,7 +52,7 @@
       class="absolute left-[18px] bottom-[14px] text-[12px] text-ink-soft bg-paper/80 px-2.5 py-[5px] rounded-[6px] border border-paper-edge leading-snug max-w-[44ch] md:max-w-[min(44ch,calc(100%-230px))]"
     >
       <i18n-t keypath="canvas.hint" tag="span">
-        <template #ruler><strong class="text-sage-deep">{{ t('canvas.hintRuler') }}</strong></template>
+        <template #ruler><strong class="text-sage-deep">{{ t('canvas.hintRuler', { len: rulerLen }) }}</strong></template>
         <template #pct><strong class="text-sage-deep">{{ t('canvas.hintPct') }}</strong></template>
       </i18n-t>
     </div>
@@ -90,6 +90,7 @@ const props = defineProps({
   aspect:     { type: Number,  default: 1 },
   geo:        { type: Object,  required: true },
   view:       { type: String,  default: 'template' },
+  rulerLen:   { type: String,  default: '10 cm' },
   pdfLoading: { type: Boolean, default: false },
   disabled:   { type: Boolean, default: false },
 })

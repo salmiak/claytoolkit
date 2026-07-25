@@ -80,7 +80,7 @@
   "canvas": {
     "empty": "Enter two diameters and a height greater than zero to draw the template.",
     "hint": "Scale 1:1 — verify with the {ruler} in the template after printing. Print at {pct} (no \"fit to page\").",
-    "hintRuler": "10 cm ruler",
+    "hintRuler": "{len} ruler",
     "hintPct": "100%"
   },
   "svg": {
@@ -92,7 +92,7 @@
     "circ": "circumference",
     "cylinder": "straight cylinder (equal diameters)",
     "height": "height",
-    "control": "10 cm — check scale",
+    "control": "{len} — check scale",
     "side": "side"
   },
   "pdf": {
@@ -109,7 +109,7 @@
     "step6": "5. Align the crosses (+) and tape on the back.",
     "tape": "tape → page {page}",
     "legend": "solid = cut   ·   dash-dot = tape seam   ·   + = registration mark",
-    "control": "10 cm — check scale (100%)",
+    "control": "{len} — check scale (100%)",
     "finalDim": "Fired size: ø{top} / ø{bot}, height {h} {u}",
     "shrinkNote": "Shrinkage: {p}% → template ×{k}",
     "noShrink": "No shrinkage",
@@ -135,6 +135,6 @@
     "round": "Round"
   },
   "size": {
-    "banana": "banana ~18 cm"
+    "banana": "banana {len}"
   }
 }

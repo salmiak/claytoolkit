@@ -140,7 +140,7 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   if (dR < 1e-6) {
     const W = TAU * Rbig
     return {
-      ok: true, cyl: true, W, H: h, seam, rTop, rBot, discs, shrink: { p: sp, k },
+      ok: true, cyl: true, W, H: h, h, seam, rTop, rBot, nTop, nBot, rotDeg, discs, shrink: { p: sp, k },
       metrics: {
         L: h, Ri: null, Ro: null, thetaDeg: null,
         arcTop: TAU * rTop, arcBot: TAU * rBot,
@@ -153,7 +153,7 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   const Ri = Rsmall * L / dR
   const theta = TAU * dR / L
   return {
-    ok: true, cyl: false, Ro, Ri, theta, seam, rTop, rBot, Rbig, Rsmall, discs, shrink: { p: sp, k },
+    ok: true, cyl: false, Ro, Ri, theta, h, seam, rTop, rBot, Rbig, Rsmall, nTop, nBot, rotDeg, discs, shrink: { p: sp, k },
     metrics: {
       L, Ri, Ro, thetaDeg: theta * 180 / Math.PI,
       arcTop: TAU * rTop, arcBot: TAU * rBot,

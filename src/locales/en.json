@@ -34,7 +34,9 @@
     "note": "Discs are drawn at the given diameter, with no seam allowance."
   },
   "shape": {
-    "label": "Your shape"
+    "label": "Your shape",
+    "dragHint": "drag to rotate",
+    "empty": "Enter dimensions to see the shape"
   },
   "computed": {
     "label": "Calculated",
@@ -116,11 +118,6 @@
     "overview_label": "Overview",
     "pageLabel": "page {page}/{total}",
     "faceted": "Faceted: {info}"
-  },
-  "schematic": {
-    "top": "øtop {v}",
-    "bot": "øbottom {v}",
-    "height": "height {v}"
   },
   "faces": {
     "label": "Corners (faceted shape)",

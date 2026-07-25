@@ -34,7 +34,9 @@
     "note": "Skivorna ritas i angiven diameter, utan skarvmån."
   },
   "shape": {
-    "label": "Formen du får"
+    "label": "Formen du får",
+    "dragHint": "dra för att vrida",
+    "empty": "Ange mått för att se formen"
   },
   "computed": {
     "label": "Beräknat",
@@ -116,11 +118,6 @@
     "overview_label": "Översikt",
     "pageLabel": "sida {page}/{total}",
     "faceted": "Facetterad: {info}"
-  },
-  "schematic": {
-    "top": "øtopp {v}",
-    "bot": "øbotten {v}",
-    "height": "höjd {v}"
   },
   "faces": {
     "label": "Hörn (facetterad form)",

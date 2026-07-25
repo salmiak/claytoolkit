@@ -201,10 +201,12 @@
         <!-- Shape -->
         <div v-show="!isDesktop || activeTab === 'shape'" :class="isDesktop ? '' : 'mb-[22px]'">
           <div v-if="!isDesktop" class="group-lbl">{{ t('shape.label') }}</div>
-          <!-- Shares the sheet's fill on desktop, so the border does the framing. -->
-          <div class="bg-frame-3 border border-frame-line rounded-[9px] px-2.5 pt-3 pb-1.5">
-            <svg viewBox="0 0 300 180" class="w-full h-auto block" :aria-label="t('shape.label')" v-html="schematicSvg" />
-          </div>
+          <ShapeWireframe
+            :geo="geo"
+            :label="t('shape.label')"
+            :hint="t('shape.dragHint')"
+            :emptyLabel="t('shape.empty')"
+          />
         </div>
 
         <!-- Calculations -->
@@ -251,6 +253,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { fmt } from '../composables/useGeometry.js'
+import ShapeWireframe from './ShapeWireframe.vue'
 import { useMediaQuery } from '../composables/useMediaQuery.js'
 
 const { t } = useI18n()
@@ -325,40 +328,6 @@ const shrinkFactor = computed(() => {
   return (100 / (100 - sp)).toFixed(3)
 })
 
-const schematicSvg = computed(() => {
-  const top = Math.max(0, +dTop.value || 0)
-  const bot = Math.max(0, +dBot.value || 0)
-  const hh  = Math.max(0, +h.value || 0)
-  if (!(Math.max(top, bot) > 0 && hh > 0)) return ''
-  const W = 300, H = 180
-  const mT = 26, mB = 44   // room for the ⌀ labels above and below
-  const mL = 14, mR = 52   // room for the height dimension on the right
-  const availW = W - mL - mR
-  const availH = H - mT - mB
-
-  // One scale for both axes, so the preview keeps the real proportions:
-  // whichever of width or height runs out of room first sets the scale.
-  const sc = Math.min(availW / Math.max(top, bot, 1), availH / hh)
-
-  const tw = top * sc / 2, bw = bot * sc / 2
-  const shapeH = hh * sc
-  const cx = mL + availW / 2
-  const yT = mT + (availH - shapeH) / 2
-  const yB = yT + shapeH
-  const pts = `${cx-tw},${yT} ${cx+tw},${yT} ${cx+bw},${yB} ${cx-bw},${yB}`
-  const ac = '#7C9473', mf = `ui-monospace,monospace`
-  const hmx = cx + Math.max(tw, bw) + 16
-  const hmy = (yT + yB) / 2
-  return (
-    `<polygon points="${pts}" fill="#7C9473" fill-opacity="0.12" stroke="#E4D6C3" stroke-width="1.2"/>` +
-    `<line x1="${cx-tw}" y1="${yT-9}" x2="${cx+tw}" y2="${yT-9}" stroke="${ac}" stroke-width="1"/>` +
-    `<text x="${cx}" y="${yT-13}" fill="${ac}" font-family="${mf}" font-size="11" text-anchor="middle">${t('schematic.top', { v: top })}</text>` +
-    `<line x1="${cx-bw}" y1="${yB+11}" x2="${cx+bw}" y2="${yB+11}" stroke="${ac}" stroke-width="1"/>` +
-    `<text x="${cx}" y="${yB+25}" fill="${ac}" font-family="${mf}" font-size="11" text-anchor="middle">${t('schematic.bot', { v: bot })}</text>` +
-    `<line x1="${hmx}" y1="${yT}" x2="${hmx}" y2="${yB}" stroke="${ac}" stroke-width="1"/>` +
-    `<text x="${hmx+4}" y="${hmy}" fill="${ac}" font-family="${mf}" font-size="11" transform="rotate(-90 ${hmx+4} ${hmy})" text-anchor="middle">${t('schematic.height', { v: hh })}</text>`
-  )
-})
 
 const readoutRows = computed(() => {
   const g = props.geo

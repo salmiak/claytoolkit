@@ -32,6 +32,7 @@
               type="number" min="0" step="1"
               :value="field.model.value"
               @input="field.model.value = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => field.model.value = v)"
               class="field-input"
             />
             <span class="field-unit">{{ unit }}</span>
@@ -50,6 +51,7 @@
               type="number" min="0" max="30" step="0.5"
               :value="shrinkP"
               @input="shrinkP = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => shrinkP = v)"
               :disabled="!shrinkOn"
               class="field-input"
             />
@@ -72,6 +74,7 @@
               type="number" min="0" step="1"
               :value="seamW"
               @input="seamW = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => seamW = v)"
               :disabled="!seamOn"
               class="field-input"
             />
@@ -213,6 +216,25 @@ const dimFields = computed(() => [
   { key: 'dBot', label: t('dims.dBot'), hint: t('dims.dBotHint'), model: dBot },
   { key: 'h',    label: t('dims.height'), hint: t('dims.heightHint'), model: h },
 ])
+
+// Shift + Up/Down jumps ten steps, as most editors do. Browsers don't do this
+// for number inputs, so it is handled here; the plain arrow keys stay native.
+// Each field's own step/min/max is read off the element, so the 0.5-step
+// shrinkage field jumps 5 while the 1-step fields jump 10.
+// Takes a setter rather than the model ref: top-level refs are auto-unwrapped
+// in template expressions, so a ref argument would arrive as a bare number.
+function onStepKey(e, set) {
+  if (!e.shiftKey || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return
+  e.preventDefault()
+  const el = e.target
+  const step = +el.step || 1
+  const min = el.min === '' ? -Infinity : +el.min
+  const max = el.max === '' ? Infinity : +el.max
+  const base = Number.isFinite(+el.value) ? +el.value : 0
+  const decimals = (String(step).split('.')[1] || '').length
+  const next = Math.min(max, Math.max(min, base + (e.key === 'ArrowUp' ? 1 : -1) * step * 10))
+  set(+next.toFixed(decimals))
+}
 
 const shrinkFactor = computed(() => {
   if (!shrinkOn.value) return null

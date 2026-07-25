@@ -104,8 +104,14 @@
       </div>
     </div>
 
-    <!-- Sheet: tabbed and pinned to the bottom on desktop, stacked on mobile -->
-    <div class="shrink-0 md:border-t md:border-frame-rule md:bg-frame">
+    <!-- Sheet: tabbed and pinned to the bottom on desktop, stacked on mobile.
+         Dark-on-dark background steps read very weakly (frame-2 against frame
+         is only 1.1:1), so the separation leans on the top edge and the
+         upward shadow, with the darker fill reinforcing them. -->
+    <div
+      class="shrink-0 md:bg-frame-3 md:border-t-2 md:border-clay-fired
+             md:shadow-[0_-10px_24px_-10px_rgba(0,0,0,0.6)]"
+    >
 
       <!-- Tab bar (desktop only) -->
       <div v-if="isDesktop" class="flex px-2 pt-2 gap-1" role="tablist">
@@ -130,7 +136,8 @@
         <!-- Shape -->
         <div v-show="!isDesktop || activeTab === 'shape'" :class="isDesktop ? '' : 'mb-[22px]'">
           <div v-if="!isDesktop" class="group-lbl">{{ t('shape.label') }}</div>
-          <div class="bg-frame-3 border border-frame-rule rounded-[9px] px-2.5 pt-3 pb-1.5">
+          <!-- Shares the sheet's fill on desktop, so the border does the framing. -->
+          <div class="bg-frame-3 border border-frame-line rounded-[9px] px-2.5 pt-3 pb-1.5">
             <svg viewBox="0 0 300 180" class="w-full h-auto block" :aria-label="t('shape.label')" v-html="schematicSvg" />
           </div>
         </div>

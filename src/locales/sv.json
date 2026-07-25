@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "Konform",
-    "sub": "Mallgenerator för koniska keramikformer. Ange två diametrar och höjden — verktyget vecklar ut manteln till en platt mall (cirkelringssektor) i skala 1:1."
+    "name": "Clay Toolkit"
   },
   "unit": {
     "label": "Enhet"

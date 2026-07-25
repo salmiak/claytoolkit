@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "Konform",
-    "sub": "Template generator for conical ceramic forms. Enter two diameters and the height — the tool unrolls the lateral surface into a flat pattern (annular sector) at 1:1 scale."
+    "name": "Clay Toolkit"
   },
   "unit": {
     "label": "Unit"

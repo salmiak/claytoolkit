@@ -5,7 +5,6 @@
       <h1 class="text-xl font-[650] tracking-[-0.01em] text-[#EDEAE1] m-0 leading-none">
         <span class="text-teal font-mono font-normal mr-2">◠</span>{{ t('app.name') }}
       </h1>
-      <p class="text-[#9c968a] text-[13px] leading-snug max-w-[60ch]">{{ t('app.sub') }}</p>
       <button
         @click="toggleLocale"
         class="ml-auto text-[12px] font-mono text-[#9c968a] hover:text-[#EDEAE1] border border-[#4a4842] rounded-md px-3 py-1 transition-colors shrink-0"

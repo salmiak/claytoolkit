@@ -225,9 +225,21 @@ const schematicSvg = computed(() => {
   const bot = Math.max(0, +dBot.value || 0)
   const hh  = Math.max(0, +h.value || 0)
   if (!(Math.max(top, bot) > 0 && hh > 0)) return ''
-  const W = 300, H = 180, cx = 150, mT = 26, mB = 44
-  const maxW = Math.max(top, bot, 1), sc = 150 / maxW
-  const tw = top * sc / 2, bw = bot * sc / 2, yT = mT, yB = H - mB
+  const W = 300, H = 180
+  const mT = 26, mB = 44   // room for the ⌀ labels above and below
+  const mL = 14, mR = 52   // room for the height dimension on the right
+  const availW = W - mL - mR
+  const availH = H - mT - mB
+
+  // One scale for both axes, so the preview keeps the real proportions:
+  // whichever of width or height runs out of room first sets the scale.
+  const sc = Math.min(availW / Math.max(top, bot, 1), availH / hh)
+
+  const tw = top * sc / 2, bw = bot * sc / 2
+  const shapeH = hh * sc
+  const cx = mL + availW / 2
+  const yT = mT + (availH - shapeH) / 2
+  const yB = yT + shapeH
   const pts = `${cx-tw},${yT} ${cx+tw},${yT} ${cx+bw},${yB} ${cx-bw},${yB}`
   const ac = '#7C9473', mf = `ui-monospace,monospace`
   const hmx = cx + Math.max(tw, bw) + 16

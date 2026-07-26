@@ -85,6 +85,22 @@
         </div>
 
         <div v-if="faceted" class="mt-[14px] w-1/2 pr-1.5">
+          <label for="cornerR" class="block text-[12px] mb-[4px] text-clay-sand">
+            {{ t('faces.cornerRadius') }}
+          </label>
+          <div class="relative flex items-center">
+            <input
+              id="cornerR" type="number" min="0" :step="stepFor"
+              :value="cornerR"
+              @input="cornerR = $event.target.valueAsNumber"
+              @keydown="onStepKey($event, v => cornerR = v)"
+              class="field-input field-narrow"
+            />
+            <span class="field-unit">{{ unit }}</span>
+          </div>
+        </div>
+
+        <div v-if="faceted" class="mt-[14px] w-1/2 pr-1.5">
           <label for="rotDeg" class="block text-[12px] mb-[4px] text-clay-sand">
             {{ t('faces.rotation') }}
           </label>
@@ -308,6 +324,7 @@ const discBot  = defineModel('discBot')
 const nTop     = defineModel('nTop')
 const nBot     = defineModel('nBot')
 const rotDeg   = defineModel('rotDeg')
+const cornerR  = defineModel('cornerR')
 const roundTop = defineModel('roundTop')
 const roundBot = defineModel('roundBot')
 
@@ -373,6 +390,17 @@ const readoutRows = computed(() => {
   const rows = []
   if (g.shrink && g.shrink.p > 0)
     rows.push([t('computed.shrinkReadout'), `${g.shrink.p} % · ×${g.shrink.k.toFixed(3)}`])
+  if (g.onePiece) {
+    rows.push(
+      [t('computed.pieces'),  t('computed.onePiece')],
+      [t('computed.slant'),   `${fmt(m.L, u)} ${u}`],
+      [t('computed.perimBot'), `${fmt(m.arcBot, u)} ${u}`],
+      [t('computed.perimTop'), `${fmt(m.arcTop, u)} ${u}`],
+    )
+    if (g.cornerR > 0) rows.push([t('computed.cornerR'), `${fmt(g.cornerR, u)} ${u}`])
+    if (g.cornerClamped) rows.push([t('computed.cornerMax'), `${fmt(g.maxCornerR, u)} ${u}`])
+    return rows
+  }
   if (g.faceted) {
     rows.push(
       [t('computed.faceCount'), String(g.faceCount)],

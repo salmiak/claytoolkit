@@ -282,6 +282,21 @@
             <button @click="$emit('print')" :disabled="!geo.ok" class="btn btn-ghost">
               {{ t('actions.print') }}
             </button>
+            <!-- Sharing the shape belongs with the other ways of getting it out. -->
+            <button @click="copyLink" class="btn btn-ghost">
+              <svg v-if="!copied" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.1" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" />
+                <path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" />
+              </svg>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              {{ copied ? t('actions.copied') : t('actions.copyLink') }}
+            </button>
           </div>
         </div>
       </div>
@@ -304,6 +319,28 @@ const { t } = useI18n()
 // Matches the md: breakpoint that splits the layout into panel + preview.
 const isDesktop = useMediaQuery('(min-width: 768px)')
 const activeTab = ref('shape')
+
+const copied = ref(false)
+let copiedTimer = null
+
+async function copyLink() {
+  const url = props.shareLink || window.location.href
+  try {
+    await navigator.clipboard.writeText(url)
+  } catch {
+    // clipboard API needs a secure context; fall back so the button still works
+    const ta = document.createElement('textarea')
+    ta.value = url
+    ta.style.cssText = 'position:fixed;opacity:0'
+    document.body.appendChild(ta)
+    ta.select()
+    try { document.execCommand('copy') } catch { /* nothing more to try */ }
+    ta.remove()
+  }
+  copied.value = true
+  clearTimeout(copiedTimer)
+  copiedTimer = setTimeout(() => { copied.value = false }, 1600)
+}
 
 const tabs = computed(() => [
   { id: 'shape',  label: bigView.value === 'template' ? t('tabs.shape') : t('tabs.template') },
@@ -352,6 +389,9 @@ const props = defineProps({
   aspect:     { type: Number,  default: 1 },
   // Which view the big pane holds; this slot shows the other one.
   bigView:    { type: String,  default: 'template' },
+  // Recomputed from state rather than read off the address bar, which the URL
+  // sync updates on a debounce and so can be a step behind.
+  shareLink:  { type: String,  default: '' },
 })
 const bigView = computed(() => props.bigView)
 

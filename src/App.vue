@@ -35,6 +35,7 @@
         :svgHtml="svgHtml"
         :aspect="aspect"
         :bigView="bigView"
+        :shareLink="shareLink"
         @downloadSvg="handleDownloadSvg"
         @downloadPdf="handleDownloadPdf"
         @print="handlePrint"
@@ -119,6 +120,7 @@ watch(() => state.unit, (newUnit, oldUnit) => {
 })
 
 const rulerLen = computed(() => rulerSpec(state.unit).text)
+const shareLink = computed(() => shapeUrl(state, DEFAULTS))
 
 const svgLabels = computed(() => ({
   slant:    t('svg.slant'),

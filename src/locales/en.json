@@ -83,7 +83,9 @@
     "pdfCreating": "Generating PDF…",
     "swapViews": "Swap the two views",
     "show3d": "3D",
-    "showTemplate": "Template"
+    "showTemplate": "Template",
+    "copyLink": "Copy link to this shape",
+    "copied": "Copied"
   },
   "canvas": {
     "empty": "Enter two diameters and a height greater than zero to draw the template.",

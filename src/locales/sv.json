@@ -83,7 +83,9 @@
     "pdfCreating": "Skapar PDF…",
     "swapViews": "Byt plats på vyerna",
     "show3d": "3D",
-    "showTemplate": "Mall"
+    "showTemplate": "Mall",
+    "copyLink": "Kopiera länk till formen",
+    "copied": "Kopierad"
   },
   "canvas": {
     "empty": "Ange två diametrar och en höjd större än noll så ritas mallen här.",

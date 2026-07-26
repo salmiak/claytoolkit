@@ -26,7 +26,8 @@
         v-model:nTop="state.nTop"
         v-model:nBot="state.nBot"
         v-model:rotDeg="state.rotDeg"
-        v-model:cornerR="state.cornerR"
+        v-model:cornerRTop="state.cornerRTop"
+        v-model:cornerRBot="state.cornerRBot"
         v-model:roundTop="state.roundTop"
         v-model:roundBot="state.roundBot"
         :geo="geo"
@@ -84,7 +85,8 @@ const state = reactive({
   nTop: 4,
   nBot: 4,
   rotDeg: 0,
-  cornerR: 0,
+  cornerRTop: 0,
+  cornerRBot: 0,
   roundTop: true,
   roundBot: true,
 })
@@ -98,7 +100,8 @@ watch(() => state.unit, (newUnit, oldUnit) => {
   state.dBot = c(state.dBot)
   state.h = c(state.h)
   state.seamW = c(state.seamW)
-  state.cornerR = c(state.cornerR)
+  state.cornerRTop = c(state.cornerRTop)
+  state.cornerRBot = c(state.cornerRBot)
 })
 
 const rulerLen = computed(() => rulerSpec(state.unit).text)

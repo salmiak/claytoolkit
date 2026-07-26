@@ -164,7 +164,8 @@ function drawRoundedDiscs(g, bb, track, unit, labels) {
   let x = bb.minx
   let s = ''
   list.forEach(d => {
-    const piece = roundedDisc(d.n, d.r, Math.min(g.cornerR, maxCornerRadius(d.n, 2 * d.r * Math.sin(Math.PI / d.n))))
+    const ringR = d.key === 'bot' ? g.cornerRBot : g.cornerRTop
+    const piece = roundedDisc(d.n, d.r, Math.min(ringR, maxCornerRadius(d.n, 2 * d.r * Math.sin(Math.PI / d.n))))
     const pts = piece.pts.map(p => ({ x: p.x + x, y: p.y + top }))
     s += `<path class="cut-fill" d="M ${pts.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
     pts.forEach(track)
@@ -200,7 +201,7 @@ function finalize(inner, bb, pad) {
   return { inner, vb: `${n(x)} ${n(y)} ${n(w)} ${n(h)}`, w: n(w), h: n(h) }
 }
 
-export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0, cornerR = 0 }) {
+export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0, cornerRTop = 0, cornerRBot = 0 }) {
   const f = MM_PER_UNIT[unit] || 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
@@ -223,18 +224,22 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   // Rounded corners are only developable when the rings correspond ruling for
   // ruling: same corner count, no relative rotation. That case unrolls as one
   // continuous mantle; anything else keeps the triangulated per-face path.
-  const rc = Math.max(0, (cornerR || 0)) * f * k
+  const rcTop = Math.max(0, (cornerRTop || 0)) * f * k
+  const rcBot = Math.max(0, (cornerRBot || 0)) * f * k
   const onePiece = nTop >= 3 && nTop === nBot &&
     isAligned(nBot, nTop, (((rotDeg || 0) / 360) % 1 + 1) % 1)
 
   if (onePiece) {
-    const mantle = mantleSolution({ n: nTop, rBotCirc: rBot, rTopCirc: rTop, h, cornerR: rc })
+    const mantle = mantleSolution({ n: nTop, rBotCirc: rBot, rTopCirc: rTop, h,
+      cornerRBot: rcBot, cornerRTop: rcTop })
     if (mantle) {
       const outline = mantleOutline(mantle)
       return {
         ok: true, faceted: true, onePiece: true, cyl: false,
         mantle, outline, seam, rTop, rBot, h, nTop, nBot, rotDeg,
-        cornerR: mantle.rc, cornerClamped: mantle.clamped, maxCornerR: mantle.maxR,
+        cornerRBot: mantle.rcBot, cornerRTop: mantle.rcTop,
+        cornerClamped: mantle.clampedBot || mantle.clampedTop,
+        maxCornerRBot: mantle.maxBot, maxCornerRTop: mantle.maxTop,
         discs, shrink: { p: sp, k },
         metrics: {
           L: Math.hypot(h, Math.abs(rBot - rTop) * Math.cos(Math.PI / nTop)),

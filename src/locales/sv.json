@@ -64,7 +64,9 @@
     "perimBot": "Omkrets botten",
     "perimTop": "Omkrets topp",
     "cornerR": "Hörnradie",
-    "cornerMax": "Max hörnradie"
+    "cornerMax": "Max hörnradie",
+    "cornerRBot": "Hörnradie botten",
+    "cornerRTop": "Hörnradie topp"
   },
   "tabs": {
     "shape": "Form",

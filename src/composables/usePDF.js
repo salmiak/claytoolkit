@@ -62,7 +62,8 @@ function cutPolygon(g) {
     const by = Math.max(...o.poly.map(p => p.y)) + DISC_GAP
     discList(g).forEach(d => {
       const side = 2 * d.r * Math.sin(Math.PI / d.n)
-      const piece = roundedDisc(d.n, d.r, Math.min(g.cornerR, maxCornerRadius(d.n, side)))
+      const ringR = d.key === 'bot' ? g.cornerRBot : g.cornerRTop
+      const piece = roundedDisc(d.n, d.r, Math.min(ringR, maxCornerRadius(d.n, side)))
       polys.push(piece.pts.map(p => ({ x: p.x + bx, y: p.y + by })))
       bx += piece.w + DISC_GAP
     })

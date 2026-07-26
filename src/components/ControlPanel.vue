@@ -56,7 +56,7 @@
                    :class="col.round.value ? 'text-clay-terracotta' : 'text-clay-sand'">
               {{ t('faces.corners') }}
             </label>
-            <div class="relative flex items-center">
+            <div class="relative flex items-center mb-2.5">
               <input
                 :id="col.nId"
                 type="number" min="3" max="24" step="1"
@@ -66,6 +66,23 @@
                 @keydown="onStepKey($event, v => col.n.value = v)"
                 class="field-input field-narrow !pr-[11px]"
               />
+            </div>
+
+            <label :for="col.crId" class="block text-[12px] mb-[4px]"
+                   :class="col.round.value ? 'text-clay-terracotta' : 'text-clay-sand'">
+              {{ t('faces.cornerRadius') }}
+            </label>
+            <div class="relative flex items-center">
+              <input
+                :id="col.crId"
+                type="number" min="0" :step="stepFor"
+                :value="col.cr.value"
+                :disabled="col.round.value"
+                @input="col.cr.value = $event.target.valueAsNumber"
+                @keydown="onStepKey($event, v => col.cr.value = v)"
+                class="field-input field-narrow"
+              />
+              <span class="field-unit">{{ unit }}</span>
             </div>
           </div>
         </div>
@@ -78,22 +95,6 @@
               :value="h"
               @input="h = $event.target.valueAsNumber"
               @keydown="onStepKey($event, v => h = v)"
-              class="field-input field-narrow"
-            />
-            <span class="field-unit">{{ unit }}</span>
-          </div>
-        </div>
-
-        <div v-if="faceted" class="mt-[14px] w-1/2 pr-1.5">
-          <label for="cornerR" class="block text-[12px] mb-[4px] text-clay-sand">
-            {{ t('faces.cornerRadius') }}
-          </label>
-          <div class="relative flex items-center">
-            <input
-              id="cornerR" type="number" min="0" :step="stepFor"
-              :value="cornerR"
-              @input="cornerR = $event.target.valueAsNumber"
-              @keydown="onStepKey($event, v => cornerR = v)"
               class="field-input field-narrow"
             />
             <span class="field-unit">{{ unit }}</span>
@@ -324,7 +325,8 @@ const discBot  = defineModel('discBot')
 const nTop     = defineModel('nTop')
 const nBot     = defineModel('nBot')
 const rotDeg   = defineModel('rotDeg')
-const cornerR  = defineModel('cornerR')
+const cornerRTop = defineModel('cornerRTop')
+const cornerRBot = defineModel('cornerRBot')
 const roundTop = defineModel('roundTop')
 const roundBot = defineModel('roundBot')
 
@@ -338,9 +340,9 @@ const bananaLen = computed(() =>
 
 const columns = computed(() => [
   { side: 'top', heading: t('dims.colTop'), dId: 'dTop', nId: 'nTop', rId: 'roundTop',
-    d: dTop, n: nTop, round: roundTop },
+    crId: 'cornerRTop', d: dTop, n: nTop, round: roundTop, cr: cornerRTop },
   { side: 'bot', heading: t('dims.colBot'), dId: 'dBot', nId: 'nBot', rId: 'roundBot',
-    d: dBot, n: nBot, round: roundBot },
+    crId: 'cornerRBot', d: dBot, n: nBot, round: roundBot, cr: cornerRBot },
 ])
 
 const props = defineProps({
@@ -397,8 +399,10 @@ const readoutRows = computed(() => {
       [t('computed.perimBot'), `${fmt(m.arcBot, u)} ${u}`],
       [t('computed.perimTop'), `${fmt(m.arcTop, u)} ${u}`],
     )
-    if (g.cornerR > 0) rows.push([t('computed.cornerR'), `${fmt(g.cornerR, u)} ${u}`])
-    if (g.cornerClamped) rows.push([t('computed.cornerMax'), `${fmt(g.maxCornerR, u)} ${u}`])
+    if (g.cornerRBot > 0) rows.push([t('computed.cornerRBot'), `${fmt(g.cornerRBot, u)} ${u}`])
+    if (g.cornerRTop > 0) rows.push([t('computed.cornerRTop'), `${fmt(g.cornerRTop, u)} ${u}`])
+    if (g.cornerClamped) rows.push([t('computed.cornerMax'),
+      `${fmt(Math.min(g.maxCornerRBot, g.maxCornerRTop), u)} ${u}`])
     return rows
   }
   if (g.faceted) {

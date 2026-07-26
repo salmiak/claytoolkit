@@ -64,7 +64,9 @@
     "perimBot": "Perimeter bottom",
     "perimTop": "Perimeter top",
     "cornerR": "Corner radius",
-    "cornerMax": "Max corner radius"
+    "cornerMax": "Max corner radius",
+    "cornerRBot": "Corner radius bottom",
+    "cornerRTop": "Corner radius top"
   },
   "tabs": {
     "shape": "Shape",

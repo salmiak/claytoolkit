@@ -58,7 +58,15 @@
     "edgeTop": "Kantlängd topp",
     "approx": "Rund ring approximerad",
     "diaTop": "Diameter topp",
-    "diaBot": "Diameter botten"
+    "diaBot": "Diameter botten",
+    "pieces": "Mantel",
+    "onePiece": "ett stycke",
+    "perimBot": "Omkrets botten",
+    "perimTop": "Omkrets topp",
+    "cornerR": "Hörnradie",
+    "cornerMax": "Max hörnradie",
+    "cornerRBot": "Hörnradie botten",
+    "cornerRTop": "Hörnradie topp"
   },
   "tabs": {
     "shape": "Form",
@@ -108,7 +116,7 @@
     "step5": "   \"tejp → sida N\" möter samma märkning på sida N.",
     "step6": "5. Passa in kryssen (+) och tejpa på baksidan.",
     "tape": "tejp → sida {page}",
-    "legend": "heldragen = klipp   ·   streckprick = tejpfog   ·   + = passmärke",
+    "legend": "heldragen = klipp   ·   streckprick = tejpfog   ·   prickstreck = vik   ·   + = passmärke",
     "control": "{len} — kontrollskala (100 %)",
     "finalDim": "Slutmått: ø{top} / ø{bot}, höjd {h} {u}",
     "shrinkNote": "Krympmån: {p} % → mall ×{k}",
@@ -132,7 +140,8 @@
     "noteRound": "Rund form. Avmarkera Rund för att ge en ring hörn.",
     "noteFaceted": "Sidlängden är måttet på en sida. Mallen visar varje sida en gång med antal att klippa.",
     "corners": "Hörn",
-    "round": "Rund"
+    "round": "Rund",
+    "cornerRadius": "Hörnradie"
   },
   "size": {
     "banana": "banan {len}"

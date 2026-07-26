@@ -58,7 +58,15 @@
     "edgeTop": "Edge length top",
     "approx": "Round ring approximated",
     "diaTop": "Diameter top",
-    "diaBot": "Diameter bottom"
+    "diaBot": "Diameter bottom",
+    "pieces": "Mantle",
+    "onePiece": "one piece",
+    "perimBot": "Perimeter bottom",
+    "perimTop": "Perimeter top",
+    "cornerR": "Corner radius",
+    "cornerMax": "Max corner radius",
+    "cornerRBot": "Corner radius bottom",
+    "cornerRTop": "Corner radius top"
   },
   "tabs": {
     "shape": "Shape",
@@ -108,7 +116,7 @@
     "step5": "   \"tape → page N\" matches the same mark on page N.",
     "step6": "5. Align the crosses (+) and tape on the back.",
     "tape": "tape → page {page}",
-    "legend": "solid = cut   ·   dash-dot = tape seam   ·   + = registration mark",
+    "legend": "solid = cut   ·   dash-dot = tape seam   ·   dot-dash = fold   ·   + = registration mark",
     "control": "{len} — check scale (100%)",
     "finalDim": "Fired size: ø{top} / ø{bot}, height {h} {u}",
     "shrinkNote": "Shrinkage: {p}% → template ×{k}",
@@ -132,7 +140,8 @@
     "noteRound": "Round shape. Untick Round to give a ring corners.",
     "noteFaceted": "Side length is the measurement across one face. The template shows each side once with how many to cut.",
     "corners": "Corners",
-    "round": "Round"
+    "round": "Round",
+    "cornerRadius": "Corner radius"
   },
   "size": {
     "banana": "banana {len}"

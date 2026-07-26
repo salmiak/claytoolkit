@@ -27,6 +27,23 @@ export function buildWireframe(g) {
   const rTop = g.rTop || 0
   if (h <= 0 || Math.max(rBot, rTop) <= 0) return null
 
+  // The one-piece path already holds its 3D rings, rounded corners and all, so
+  // reuse them rather than rebuilding the shape a second way.
+  if (g.onePiece && g.mantle) {
+    const bot = g.mantle.bot3, top = g.mantle.top3
+    const verts = [...bot, ...top]
+    const T = i => bot.length + i
+    const edges = []
+    for (let i = 0; i < bot.length; i++) edges.push([i, (i + 1) % bot.length, 'ring'])
+    for (let i = 0; i < top.length; i++) edges.push([T(i), T((i + 1) % top.length), 'ring'])
+    // Only the fold rulings, not every sampled one: the arcs read as curves.
+    g.mantle.folds.forEach(i => edges.push([i, T(i), 'seam']))
+    const centre = { x: 0, y: 0, z: h / 2 }
+    const radius = Math.max(1e-6,
+      ...verts.map(v => Math.hypot(v.x - centre.x, v.y - centre.y, v.z - centre.z)))
+    return { verts, edges, centre, radius }
+  }
+
   const nBot = g.nBot >= 3 ? g.nBot : 0
   const nTop = g.nTop >= 3 ? g.nTop : 0
   const segBot = nBot || ROUND_SEG

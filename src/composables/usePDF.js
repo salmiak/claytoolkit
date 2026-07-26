@@ -1,5 +1,6 @@
 import { discList, DISC_GAP, rulerSpec } from './useGeometry.js'
 import { facetedPieces, edgeStrip } from './usePolyhedron.js'
+import { roundedDisc, maxCornerRadius } from './useRoundedMantle.js'
 
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
@@ -40,6 +41,34 @@ function circlePoly(cx, cy, r) {
 function cutPolygon(g) {
   const polys = []
   const seams = []
+
+  // One continuous mantle plus its base/lid. Fold lines are returned separately
+  // so they can be drawn as creases rather than cut.
+  if (g.onePiece) {
+    const o = g.outline
+    polys.push(o.poly)
+    if (g.seam > 0) {
+      o.seamEdges.forEach(([a, b], i) => {
+        const dx = b.x - a.x, dy = b.y - a.y
+        const l = Math.hypot(dx, dy) || 1
+        const sgn = i === 0 ? 1 : -1
+        const nx = sgn * dy / l, ny = -sgn * dx / l
+        seams.push([a, b,
+          { x: b.x + nx * g.seam, y: b.y + ny * g.seam },
+          { x: a.x + nx * g.seam, y: a.y + ny * g.seam }])
+      })
+    }
+    let bx = Math.min(...o.poly.map(p => p.x))
+    const by = Math.max(...o.poly.map(p => p.y)) + DISC_GAP
+    discList(g).forEach(d => {
+      const side = 2 * d.r * Math.sin(Math.PI / d.n)
+      const ringR = d.key === 'bot' ? g.cornerRBot : g.cornerRTop
+      const piece = roundedDisc(d.n, d.r, Math.min(ringR, maxCornerRadius(d.n, side)))
+      polys.push(piece.pts.map(p => ({ x: p.x + bx, y: p.y + by })))
+      bx += piece.w + DISC_GAP
+    })
+    return { polys, seams, folds: o.folds }
+  }
 
   // Faceted shapes are already flat pieces laid out in template space; the
   // tiling below treats them like any other set of outlines.
@@ -203,7 +232,7 @@ export async function generatePDF(g, inputVals, labels) {
   const { jsPDF } = await import('jspdf')
   const { unit, dTop, dBot, h: height } = inputVals
   const spec = rulerSpec(unit)
-  const { polys, seams } = cutPolygon(g)
+  const { polys, seams, folds = [] } = cutPolygon(g)
   const raw = bboxOf([...polys, ...seams])
   const tw = raw.maxx - raw.minx, th = raw.maxy - raw.miny
   const M = 6
@@ -230,9 +259,13 @@ export async function generatePDF(g, inputVals, labels) {
       const rect = { l: tL, t: tT, r: tL + C.cw, b: tT + C.ch }
       const cps = polys.map(p => clipPoly(p, rect)).filter(p => p.length >= 3)
       const sp = seams.map(s => clipPoly(s, rect)).filter(s => s.length >= 3)
+      // fold lines kept whole only when both ends fall on this tile
+      const fl = folds.filter(f =>
+        f.a.x >= rect.l && f.a.x <= rect.r && f.a.y >= rect.t && f.a.y <= rect.b &&
+        f.b.x >= rect.l && f.b.x <= rect.r && f.b.y >= rect.t && f.b.y <= rect.b)
       if (cps.length || sp.length) {
         num++; pageOf[`${r}_${c}`] = num
-        tiles.push({ r, c, tL, tT, rect, cps, sp })
+        tiles.push({ r, c, tL, tT, rect, cps, sp, fl })
       }
     }
   }
@@ -320,6 +353,13 @@ export async function generatePDF(g, inputVals, labels) {
     stroke(doc, SAGE, 0.35); dset(doc, [1.6, 1.2])
     t.sp.forEach(s => polyline(doc, s.map(map), true))
     dset(doc, [])
+
+    // Creases: drawn inside the outline, never to be cut.
+    if (t.fl?.length) {
+      stroke(doc, SOFT, 0.3); dset(doc, [4, 1.4, 0.8, 1.4])
+      t.fl.forEach(f => { const a = map(f.a), b = map(f.b); doc.line(a.x, a.y, b.x, b.y) })
+      dset(doc, [])
+    }
 
     t.cps.forEach(cp => {
       const runs = toRuns(cp, t.rect)

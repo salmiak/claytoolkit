@@ -1,4 +1,5 @@
-import { facetedSolution, facetedPieces, edgeStrip, PIECE_GAP } from './usePolyhedron.js'
+import { facetedSolution, facetedPieces, edgeStrip, PIECE_GAP, isAligned } from './usePolyhedron.js'
+import { mantleSolution, mantleOutline, roundedDisc, maxCornerRadius } from './useRoundedMantle.js'
 
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
@@ -115,6 +116,66 @@ function drawFaceted(g, bb, track, unit, labels) {
   return s
 }
 
+// The mantle as one continuous piece: a single cut outline, fold rulings where
+// each corner begins and ends, and seam allowance on the two end rulings where
+// the strip closes on itself.
+function drawOnePiece(g, bb, track, unit, labels) {
+  const o = g.outline
+  let s = ''
+
+  if (g.seam > 0) {
+    o.seamEdges.forEach(([a, b], i) => {
+      // Offset away from the piece, so the two ends overlap when joined.
+      const dx = b.x - a.x, dy = b.y - a.y
+      const l = Math.hypot(dx, dy) || 1
+      const sgn = i === 0 ? 1 : -1
+      const nx = sgn * dy / l, ny = -sgn * dx / l
+      const strip = [a, b,
+        { x: b.x + nx * g.seam, y: b.y + ny * g.seam },
+        { x: a.x + nx * g.seam, y: a.y + ny * g.seam }]
+      strip.forEach(track)
+      s += `<path class="seam" d="M ${strip.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+    })
+  }
+
+  s += `<path class="cut-fill" d="M ${o.poly.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+  o.poly.forEach(track)
+
+  // Fold lines are inside the outline, so they must not be cut lines.
+  o.folds.forEach(f => {
+    s += `<line class="fold" x1="${n(f.a.x)}" y1="${n(f.a.y)}" x2="${n(f.b.x)}" y2="${n(f.b.y)}"/>`
+  })
+
+  const mid = Math.floor(o.B.length / 2)
+  s += `<text class="lbl-txt" x="${n(o.B[mid].x)}" y="${n(o.B[mid].y + 7)}" text-anchor="middle">` +
+       `${labels.bot} ${fmt(g.mantle.perimBot, unit)} ${unit}</text>`
+  s += `<text class="lbl-sub" x="${n(o.T[mid].x)}" y="${n(o.T[mid].y - 4)}" text-anchor="middle">` +
+       `${labels.top} ${fmt(g.mantle.perimTop, unit)} ${unit}</text>`
+
+  s += drawRoundedDiscs(g, bb, track, unit, labels)
+  return s
+}
+
+// Base and lid follow the wall: rounded polygons at the same corner radius.
+function drawRoundedDiscs(g, bb, track, unit, labels) {
+  const list = discList(g)
+  if (!list.length) return ''
+  const top = bb.maxy + 12
+  let x = bb.minx
+  let s = ''
+  list.forEach(d => {
+    const ringR = d.key === 'bot' ? g.cornerRBot : g.cornerRTop
+    const piece = roundedDisc(d.n, d.r, Math.min(ringR, maxCornerRadius(d.n, 2 * d.r * Math.sin(Math.PI / d.n))))
+    const pts = piece.pts.map(p => ({ x: p.x + x, y: p.y + top }))
+    s += `<path class="cut-fill" d="M ${pts.map(q => `${n(q.x)} ${n(q.y)}`).join(' L ')} Z"/>`
+    pts.forEach(track)
+    s += `<text class="lbl-txt" x="${n(x + piece.w / 2)}" y="${n(top + piece.h / 2)}" text-anchor="middle">` +
+         `${d.key === 'bot' ? labels.bot : labels.top} ⌀${fmt(d.r * 2, unit)} ${unit}</text>`
+    x += piece.w + DISC_GAP
+  })
+  return s
+}
+
 function ruler(bb, x0, labels, unit) {
   const { mm: L, major, minor } = rulerSpec(unit)
   const y = bb.maxy + 9
@@ -140,7 +201,7 @@ function finalize(inner, bb, pad) {
   return { inner, vb: `${n(x)} ${n(y)} ${n(w)} ${n(h)}`, w: n(w), h: n(h) }
 }
 
-export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0 }) {
+export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0, cornerRTop = 0, cornerRBot = 0 }) {
   const f = MM_PER_UNIT[unit] || 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
@@ -159,6 +220,35 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
   // Discs are cut at the given diameter, shrink-scaled like the wall but with no
   // seam allowance — a disc has no vertical joint to overlap.
   const discs = { top: !!discTop, bot: !!discBot }
+
+  // Rounded corners are only developable when the rings correspond ruling for
+  // ruling: same corner count, no relative rotation. That case unrolls as one
+  // continuous mantle; anything else keeps the triangulated per-face path.
+  const rcTop = Math.max(0, (cornerRTop || 0)) * f * k
+  const rcBot = Math.max(0, (cornerRBot || 0)) * f * k
+  const onePiece = nTop >= 3 && nTop === nBot &&
+    isAligned(nBot, nTop, (((rotDeg || 0) / 360) % 1 + 1) % 1)
+
+  if (onePiece) {
+    const mantle = mantleSolution({ n: nTop, rBotCirc: rBot, rTopCirc: rTop, h,
+      cornerRBot: rcBot, cornerRTop: rcTop })
+    if (mantle) {
+      const outline = mantleOutline(mantle)
+      return {
+        ok: true, faceted: true, onePiece: true, cyl: false,
+        mantle, outline, seam, rTop, rBot, h, nTop, nBot, rotDeg,
+        cornerRBot: mantle.rcBot, cornerRTop: mantle.rcTop,
+        cornerClamped: mantle.clampedBot || mantle.clampedTop,
+        maxCornerRBot: mantle.maxBot, maxCornerRTop: mantle.maxTop,
+        discs, shrink: { p: sp, k },
+        metrics: {
+          L: Math.hypot(h, Math.abs(rBot - rTop) * Math.cos(Math.PI / nTop)),
+          Ri: null, Ro: null, thetaDeg: null,
+          arcTop: mantle.perimTop, arcBot: mantle.perimBot,
+        },
+      }
+    }
+  }
 
   // Any faceted ring takes the polyhedral path; two round rings keep the
   // original cone/cylinder unrolling, which is exact and far more compact.
@@ -226,6 +316,12 @@ export function buildTemplate(g, unit, labels) {
   const track = p => {
     bb.minx = Math.min(bb.minx, p.x); bb.miny = Math.min(bb.miny, p.y)
     bb.maxx = Math.max(bb.maxx, p.x); bb.maxy = Math.max(bb.maxy, p.y)
+  }
+
+  if (g.onePiece) {
+    inner += drawOnePiece(g, bb, track, unit, labels)
+    inner += ruler(bb, bb.minx, labels, unit)
+    return finalize(inner, bb, pad)
   }
 
   if (g.faceted) {
@@ -315,6 +411,7 @@ export const SVG_STYLE = `
   .cut{fill:none;stroke:#241F1C;stroke-width:.5}
   .cut-fill{fill:#ffffff;fill-opacity:.55;stroke:#241F1C;stroke-width:.5}
   .seam{fill:#7C9473;fill-opacity:.10;stroke:#7C9473;stroke-width:.4;stroke-dasharray:2.4 1.8}
+  .fold{fill:none;stroke:#6B4A36;stroke-width:.35;stroke-dasharray:5 2 1 2}
   .dim{stroke:#7C9473;stroke-width:.3}
   .dim-txt{fill:#5A6E52;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}
   .lbl-txt{fill:#241F1C;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:4.4px}

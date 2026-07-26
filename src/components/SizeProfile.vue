@@ -20,13 +20,17 @@
                  stroke="#E4D6C3" stroke-width="1.2" />
         <line :x1="shape.dimX" :y1="shape.top" :x2="shape.dimX" :y2="shape.base"
               stroke="#7C9473" stroke-width="0.8" />
-        <text :x="shape.dimX + 4" :y="(shape.top + shape.base) / 2"
+        <text :x="shape.hLabelX" :y="(shape.top + shape.base) / 2"
               fill="#7C9473" font-family="ui-monospace,monospace" font-size="9"
-              :transform="`rotate(-90 ${shape.dimX + 4} ${(shape.top + shape.base) / 2})`"
+              :transform="`rotate(-90 ${shape.hLabelX} ${(shape.top + shape.base) / 2})`"
               text-anchor="middle">{{ shape.hLabel }}</text>
+        <text :x="shape.cx" :y="shape.top - 4" text-anchor="middle"
+              fill="#E4D6C3" font-family="ui-monospace,monospace" font-size="9">
+          {{ shape.topLabel }}
+        </text>
         <text :x="shape.cx" :y="shape.base + 11" text-anchor="middle"
               fill="#E4D6C3" font-family="ui-monospace,monospace" font-size="9">
-          {{ shape.wLabel }}
+          {{ shape.botLabel }}
         </text>
       </template>
     </svg>
@@ -58,7 +62,9 @@ const MM_PER_UNIT = 180 / BANANA_ARC_UNITS
 const BANANA_MM = { w: BB.w * MM_PER_UNIT, h: BB.h * MM_PER_UNIT }
 
 const PAD = 14
-const LABEL_ROOM = 16   // for the width caption under the baseline
+const LABEL_ROOM = 16   // for the diameter caption under the baseline
+const TOP_ROOM = 13     // for the diameter caption above the top edge
+const RIGHT_ROOM = 26   // for the height dimension line and its rotated label
 
 const props = defineProps({
   geo:         { type: Object, required: true },
@@ -98,8 +104,8 @@ const scale = computed(() => {
   if (!r || !box.value.w) return 0
   const reqW = Math.max(BANANA_MM.w, r.wMax)
   const reqH = Math.max(BANANA_MM.h, r.h)
-  return Math.min((box.value.w - PAD * 2) / reqW,
-                  (box.value.h - PAD * 2 - LABEL_ROOM) / reqH)
+  return Math.min((box.value.w - PAD * 2 - RIGHT_ROOM) / reqW,
+                  (box.value.h - PAD * 2 - LABEL_ROOM - TOP_ROOM) / reqH)
 })
 
 const baseline = computed(() => box.value.h - PAD - LABEL_ROOM)
@@ -119,7 +125,7 @@ const banana = computed(() => {
 const shape = computed(() => {
   const r = real.value, s = scale.value
   if (!r || !s) return null
-  const cx = box.value.w / 2
+  const cx = (box.value.w - RIGHT_ROOM) / 2
   const base = baseline.value
   const top = base - r.h * s
   const ht = r.wTop * s / 2, hb = r.wBot * s / 2
@@ -129,8 +135,13 @@ const shape = computed(() => {
             `${(cx+hb).toFixed(1)},${base.toFixed(1)} ${(cx-hb).toFixed(1)},${base.toFixed(1)}`,
     cx, top, base,
     dimX: cx + Math.max(ht, hb) + 8,
+    // Rotated -90, the glyph ascent falls to the LEFT of the baseline, so the
+    // baseline has to clear the dimension line by more than the ascent (~0.75em)
+    // or the text sits on top of it.
+    hLabelX: cx + Math.max(ht, hb) + 19,
     hLabel: `${fmt(r.h, u)} ${u}`,
-    wLabel: `⌀${fmt(r.wBot, u)} ${u}`,
+    topLabel: `⌀${fmt(r.wTop, u)} ${u}`,
+    botLabel: `⌀${fmt(r.wBot, u)} ${u}`,
   }
 })
 </script>

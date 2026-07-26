@@ -71,11 +71,12 @@ const { t, locale } = useI18n()
 // hyphenation and translation prompts.
 watch(locale, l => { document.documentElement.lang = l }, { immediate: true })
 
+// Defaults describe a mug: 90mm opening tapering to a 70mm base, 77mm tall.
 const state = reactive({
   unit: 'mm',
-  dTop: 60,
-  dBot: 120,
-  h: 100,
+  dTop: 90,
+  dBot: 70,
+  h: 77,
   shrinkOn: false,
   shrinkP: 12,
   seamOn: false,

@@ -59,6 +59,7 @@
 <script setup>
 import { reactive, computed, ref, watch } from 'vue'
 import { storeLocale } from './locale.js'
+import { decodeState, syncUrl, shapeUrl } from './shareUrl.js'
 import { useI18n } from 'vue-i18n'
 import ControlPanel from './components/ControlPanel.vue'
 import TemplateCanvas from './components/TemplateCanvas.vue'
@@ -72,7 +73,7 @@ const { t, locale } = useI18n()
 watch(locale, l => { document.documentElement.lang = l }, { immediate: true })
 
 // Defaults describe a mug: 90mm opening tapering to a 70mm base, 77mm tall.
-const state = reactive({
+const DEFAULTS = {
   unit: 'mm',
   dTop: 90,
   dBot: 70,
@@ -90,7 +91,19 @@ const state = reactive({
   cornerRBot: 0,
   roundTop: true,
   roundBot: true,
-})
+}
+
+// A shape arriving by URL wins over the defaults, so shared and bookmarked
+// links open on the shape they describe.
+const state = reactive({ ...DEFAULTS, ...decodeState(window.location.search) })
+
+// Keep the address bar current, debounced so typing a number doesn't rewrite it
+// on every keystroke.
+let urlTimer = null
+watch(state, () => {
+  clearTimeout(urlTimer)
+  urlTimer = setTimeout(() => syncUrl(state, DEFAULTS), 250)
+}, { deep: true })
 
 // Keep the physical size when the unit changes, rather than reinterpreting the
 // number. Goes through millimetres so any pair of units works.
@@ -203,6 +216,7 @@ async function handleDownloadPdf() {
     getTape:        page          => t('pdf.tape', { page }),
     legend:         t('pdf.legend'),
     control:        t('pdf.control', { len: rulerLen.value }),
+    qrCaption:      t('pdf.qrCaption'),
     overview_label: t('pdf.overview_label'),
     getPageLabel:   (page, total) => t('pdf.pageLabel', { page, total }),
     finalDim:       t('pdf.finalDim', { top: state.dTop, bot: state.dBot, h: state.h, u }),
@@ -231,7 +245,8 @@ async function handleDownloadPdf() {
     getSize:        (tw, th, n) => t('pdf.size', { w: fmt(tw, u), h: fmt(th, u), u, n }),
   }
   try {
-    await generatePDF(g, { unit: u, dTop: state.dTop, dBot: state.dBot, h: state.h }, labels)
+    await generatePDF(g, { unit: u, dTop: state.dTop, dBot: state.dBot, h: state.h,
+      shareUrl: shapeUrl(state, DEFAULTS) }, labels)
   } catch (err) {
     console.error(err)
     alert('PDF error: ' + err.message)

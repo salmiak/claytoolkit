@@ -130,7 +130,8 @@
     "size": "Mallstorlek: {w} × {h} {u}  ({n} A4-sidor)",
     "overview_label": "Översikt",
     "pageLabel": "sida {page}/{total}",
-    "faceted": "Facetterad: {info}"
+    "faceted": "Facetterad: {info}",
+    "qrCaption": "Skanna för att öppna formen"
   },
   "faces": {
     "label": "Hörn (facetterad form)",

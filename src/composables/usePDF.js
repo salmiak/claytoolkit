@@ -194,6 +194,42 @@ function cross(doc, x, y, t) {
   doc.line(x - t, y, x + t, y); doc.line(x, y - t, x, y + t)
 }
 
+// Vector QR: drawn as filled squares rather than an embedded bitmap, so it stays
+// crisp at any print scale. The encoder is imported lazily with the PDF itself,
+// so it costs nothing until someone exports.
+const QR_MM = 20
+
+async function qrMatrix(text) {
+  try {
+    const mod = await import('qrcode-generator')
+    const qrcode = mod.default || mod
+    // Type 0 auto-sizes; level M tolerates a printed template getting scuffed.
+    const q = qrcode(0, 'M')
+    q.addData(text)
+    q.make()
+    const n = q.getModuleCount()
+    const cells = []
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) cells.push([r, c])
+    return { n, cells }
+  } catch {
+    return null   // a missing encoder must not stop the template being produced
+  }
+}
+
+function drawQr(doc, m, x, y, size, caption) {
+  if (!m) return
+  const cell = size / m.n
+  doc.setFillColor(...INK)
+  // Nudge each cell a hair oversize so adjacent modules meet without hairlines.
+  m.cells.forEach(([r, c]) =>
+    doc.rect(x + c * cell, y + r * cell, cell * 1.02, cell * 1.02, 'F'))
+  if (caption) {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6)
+    doc.setTextColor(...SOFT)
+    doc.text(caption, x + size / 2, y + size + 2.6, { align: 'center', maxWidth: size + 8 })
+  }
+}
+
 function pdfHeader(doc, C, title, sub) {
   doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(11)
   doc.text(title, MARGIN, MARGIN + 5)
@@ -230,7 +266,8 @@ function controlRuler(doc, x, y, labels, spec) {
 
 export async function generatePDF(g, inputVals, labels) {
   const { jsPDF } = await import('jspdf')
-  const { unit, dTop, dBot, h: height } = inputVals
+  const { unit, dTop, dBot, h: height, shareUrl } = inputVals
+  const qr = shareUrl ? await qrMatrix(shareUrl) : null
   const spec = rulerSpec(unit)
   const { polys, seams, folds = [] } = cutPolygon(g)
   const raw = bboxOf([...polys, ...seams])
@@ -328,6 +365,7 @@ export async function generatePDF(g, inputVals, labels) {
       iy += sz * 0.42 + 1.6
     })
     doc.setFont('helvetica', 'normal')
+    drawQr(doc, qr, MARGIN, iy + 4, QR_MM, labels.qrCaption)
     controlRuler(doc, MARGIN, C.oy + C.ch - 4, labels, spec)
     footerLegend(doc, C, labels.overview_label, labels)
     doc.addPage()
@@ -340,9 +378,12 @@ export async function generatePDF(g, inputVals, labels) {
     pdfHeader(doc, C, title, subt)
 
     let offx = 0, offy = 0
+    // On a single page the QR shares the sheet with the drawing, so the template
+    // centres in a shortened area rather than being overlapped.
+    const qrRoom = (!multi && qr) ? QR_MM + 8 : 0
     if (!multi) {
       offx = (C.cw - tw) / 2 - (raw.minx - t.tL)
-      offy = (C.ch - th) / 2 - (raw.miny - t.tT)
+      offy = (C.ch - qrRoom - th) / 2 - (raw.miny - t.tT)
     }
     const map = p => ({ x: C.ox + (p.x - t.tL) + offx, y: C.oy + (p.y - t.tT) + offy })
 
@@ -391,6 +432,11 @@ export async function generatePDF(g, inputVals, labels) {
       })
     })
 
+    // Bottom-right of the first sheet only: one scan is enough, and repeating it
+    // on every tile would just crowd the cut lines.
+    if (!multi && qr) {
+      drawQr(doc, qr, C.ox + C.cw - QR_MM, C.oy + C.ch - QR_MM - 7, QR_MM, labels.qrCaption)
+    }
     controlRuler(doc, C.ox, C.oy + C.ch - 3.5, labels, spec)
     footerLegend(doc, C, multi ? labels.getPageLabel(pageOf[`${t.r}_${t.c}`], N) : '', labels)
   })

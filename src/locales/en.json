@@ -130,7 +130,8 @@
     "size": "Template size: {w} × {h} {u}  ({n} A4 pages)",
     "overview_label": "Overview",
     "pageLabel": "page {page}/{total}",
-    "faceted": "Faceted: {info}"
+    "faceted": "Faceted: {info}",
+    "qrCaption": "Scan to open this shape"
   },
   "faces": {
     "label": "Corners (faceted shape)",

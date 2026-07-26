@@ -105,6 +105,26 @@
         </p>
       </div>
 
+      <!-- Discs (base / lid) -->
+      <div class="mb-[22px]">
+        <div class="group-lbl">{{ t('discs.label') }}</div>
+        <div class="flex items-center gap-2.5 mt-0.5">
+          <input id="discBot" type="checkbox" v-model="discBot" class="w-[17px] h-[17px] accent-sage shrink-0" />
+          <label for="discBot" class="text-[13px] text-clay-sand flex-1">
+            {{ t('discs.bot') }} <small class="text-clay-terracotta">⌀{{ dBot || 0 }} {{ unit }}</small>
+          </label>
+        </div>
+        <div class="flex items-center gap-2.5 mt-2">
+          <input id="discTop" type="checkbox" v-model="discTop" class="w-[17px] h-[17px] accent-sage shrink-0" />
+          <label for="discTop" class="text-[13px] text-clay-sand flex-1">
+            {{ t('discs.top') }} <small class="text-clay-terracotta">⌀{{ dTop || 0 }} {{ unit }}</small>
+          </label>
+        </div>
+        <p v-if="discBot || discTop" class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
+          {{ t('discs.note') }}
+        </p>
+      </div>
+
       <!-- Shrink compensation -->
       <div class="mb-[22px]">
         <div class="group-lbl">{{ t('shrink.label') }}</div>
@@ -129,7 +149,7 @@
       </div>
 
       <!-- Seam allowance -->
-      <div class="mb-[22px]">
+      <div class="md:mb-0 mb-[22px]">
         <div class="group-lbl">{{ t('seam.label') }}</div>
         <div class="flex items-center gap-2.5 mt-0.5">
           <input id="seamOn" type="checkbox" v-model="seamOn" class="w-[17px] h-[17px] accent-sage shrink-0" />
@@ -148,25 +168,6 @@
         </div>
       </div>
 
-      <!-- Discs (base / lid) -->
-      <div class="md:mb-0 mb-[22px]">
-        <div class="group-lbl">{{ t('discs.label') }}</div>
-        <div class="flex items-center gap-2.5 mt-0.5">
-          <input id="discBot" type="checkbox" v-model="discBot" class="w-[17px] h-[17px] accent-sage shrink-0" />
-          <label for="discBot" class="text-[13px] text-clay-sand flex-1">
-            {{ t('discs.bot') }} <small class="text-clay-terracotta">⌀{{ dBot || 0 }} {{ unit }}</small>
-          </label>
-        </div>
-        <div class="flex items-center gap-2.5 mt-2">
-          <input id="discTop" type="checkbox" v-model="discTop" class="w-[17px] h-[17px] accent-sage shrink-0" />
-          <label for="discTop" class="text-[13px] text-clay-sand flex-1">
-            {{ t('discs.top') }} <small class="text-clay-terracotta">⌀{{ dTop || 0 }} {{ unit }}</small>
-          </label>
-        </div>
-        <p v-if="discBot || discTop" class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
-          {{ t('discs.note') }}
-        </p>
-      </div>
     </div>
 
     <!-- Sheet: tabbed and pinned to the bottom on desktop, stacked on mobile.

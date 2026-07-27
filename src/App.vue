@@ -238,12 +238,20 @@ async function handleDownloadPdf() {
                     })(),
     slant:          t('pdf.slant', { l: fmt(g.metrics.L, u), u }) +
                       (!g.cyl && !g.faceted ? t('pdf.angleNote', { deg: g.metrics.thetaDeg.toFixed(1) }) : ''),
-    facetedNote:    g.faceted
-                      ? t('pdf.faceted', { info:
-                          `${g.nBot >= 3 ? g.nBot : '○'}/${g.nTop >= 3 ? g.nTop : '○'}` +
-                          `, ${g.faceCount} ${t('svg.side')}, ${g.faces.length} ${t('computed.distinct').toLowerCase()}` +
-                          (g.rotDeg ? `, ${g.rotDeg}°` : '') })
-                      : '',
+    // `faceted` is true on both the one-piece and the per-face paths, but
+    // faceCount/faces exist only on the latter — so it has to branch on
+    // onePiece, not on faceted.
+    facetedNote:    !g.faceted ? '' : t('pdf.faceted', { info: (() => {
+                      const corners = `${g.nBot >= 3 ? g.nBot : '○'}/${g.nTop >= 3 ? g.nTop : '○'}`
+                      const rot = g.rotDeg ? `, ${g.rotDeg}°` : ''
+                      if (g.onePiece) {
+                        const r = (g.cornerRBot > 0 || g.cornerRTop > 0)
+                          ? `, r ${fmt(g.cornerRBot, u)}/${fmt(g.cornerRTop, u)} ${u}` : ''
+                        return `${corners}, ${t('computed.onePiece')}${r}${rot}`
+                      }
+                      return `${corners}, ${g.faceCount} ${t('svg.side')}, ` +
+                             `${g.faces.length} ${t('computed.distinct').toLowerCase()}${rot}`
+                    })() }),
     getSize:        (tw, th, n) => t('pdf.size', { w: fmt(tw, u), h: fmt(th, u), u, n }),
   }
   try {

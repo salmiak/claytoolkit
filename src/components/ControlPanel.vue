@@ -117,8 +117,23 @@
           </div>
         </div>
 
+        <!-- Only offered where both layouts exist: a mantle that unrolls whole
+             can also be cut at its corners, but a rotated or mismatched one has
+             no single-piece form to split. -->
+        <div v-if="canSplit" class="mt-[14px]">
+          <div class="flex items-center gap-2.5">
+            <input id="splitMantle" type="checkbox" v-model="splitMantle"
+                   class="w-[17px] h-[17px] accent-sage shrink-0" />
+            <label for="splitMantle" class="text-[13px] text-clay-sand flex-1">
+              {{ t('faces.split') }}
+            </label>
+          </div>
+        </div>
+
         <p class="text-[12px] text-clay-terracotta mt-2.5 leading-[1.45]">
-          {{ faceted ? t('faces.noteFaceted') : t('faces.noteRound') }}
+          {{ faceted ? (canSplit ? t(splitMantle ? 'faces.noteSplit' : 'faces.noteWhole')
+                                 : t('faces.noteFaceted'))
+                     : t('faces.noteRound') }}
         </p>
       </div>
 
@@ -366,6 +381,7 @@ const cornerRTop = defineModel('cornerRTop')
 const cornerRBot = defineModel('cornerRBot')
 const roundTop = defineModel('roundTop')
 const roundBot = defineModel('roundBot')
+const splitMantle = defineModel('splitMantle')
 
 // A ring is round when its box is ticked; its corner count is kept meanwhile so
 // unticking restores the previous value rather than resetting it.
@@ -394,6 +410,9 @@ const props = defineProps({
   shareLink:  { type: String,  default: '' },
 })
 const bigView = computed(() => props.bigView)
+// Read off the solved geometry rather than re-deriving the rule here: the
+// one-piece path stays flagged in both modes, so this tracks it automatically.
+const canSplit = computed(() => props.geo.ok && !!props.geo.onePiece)
 
 defineEmits(['downloadSvg', 'downloadPdf', 'print'])
 
@@ -434,10 +453,17 @@ const readoutRows = computed(() => {
     rows.push([t('computed.shrinkReadout'), `${g.shrink.p} % · ×${g.shrink.k.toFixed(3)}`])
   if (g.onePiece) {
     rows.push(
-      [t('computed.pieces'),  t('computed.onePiece')],
+      [t('computed.pieces'), g.split ? `${t('computed.perSide')} ×${g.nTop}`
+                                     : t('computed.onePiece')],
       [t('computed.slant'),   `${fmt(m.L, u)} ${u}`],
       [t('computed.perimBot'), `${fmt(m.arcBot, u)} ${u}`],
       [t('computed.perimTop'), `${fmt(m.arcTop, u)} ${u}`],
+    )
+    // With the mantle cut up, what gets measured on the slab is one piece's
+    // share of each ring, so quote that alongside the whole perimeter.
+    if (g.split) rows.push(
+      [t('computed.edgeBot'), `${fmt(m.arcBot / g.nTop, u)} ${u}`],
+      [t('computed.edgeTop'), `${fmt(m.arcTop / g.nTop, u)} ${u}`],
     )
     if (g.cornerRBot > 0) rows.push([t('computed.cornerRBot'), `${fmt(g.cornerRBot, u)} ${u}`])
     if (g.cornerRTop > 0) rows.push([t('computed.cornerRTop'), `${fmt(g.cornerRTop, u)} ${u}`])

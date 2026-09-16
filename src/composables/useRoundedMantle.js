@@ -149,6 +149,49 @@ export function mantleOutline(sol) {
   }
 }
 
+/**
+ * One repeating unit of the mantle: the strip between two corresponding
+ * stations, ready to be cut n times instead of as a single long piece.
+ *
+ * The rings are sampled corner-arc by corner-arc, so stations k*(steps+1) are
+ * exactly the points where each corner's bend begins. Cutting there gives a
+ * piece of "one rounded corner plus the flat panel that follows", and the seams
+ * land on rulings the maker is bending along anyway. With sharp corners
+ * steps = 0 and the unit collapses to a single flat panel — the familiar
+ * one-template-per-side case.
+ *
+ * All n units are congruent for a regular ring, so only the first is returned.
+ */
+export function sliceMantle(sol) {
+  if (!sol) return null
+  const per = sol.arcSteps + 1
+  if (sol.B.length < per + 1) return null
+  const B = sol.B.slice(0, per + 1)
+  const T = sol.T.slice(0, per + 1)
+
+  // The strip is unrolled starting from its left ruling, which leaves a single
+  // slice standing on a corner. Rotate it to sit on the chord of its bottom
+  // edge, matching how the per-face templates are laid out. A rigid motion, so
+  // nothing about the piece changes but its pose on the sheet.
+  const o = B[0], d = { x: B[per].x - o.x, y: B[per].y - o.y }
+  const a = Math.atan2(d.y, d.x)
+  const c = Math.cos(-a), sn = Math.sin(-a)
+  const rot = p => ({ x: (p.x - o.x) * c - (p.y - o.y) * sn,
+                      y: (p.x - o.x) * sn + (p.y - o.y) * c })
+  // The strip may have been unrolled into either half-plane, so the rotation can
+  // leave the top ring under the base. Mirroring rights it; a mirrored template
+  // cuts the same piece, since a slab can simply be turned over.
+  const up = T.reduce((s, p) => s + rot(p).y, 0) >= 0 ? 1 : -1
+  const place = p => { const q = rot(p); return { x: q.x, y: q.y * up } }
+  return {
+    B: B.map(place),
+    T: T.map(place),
+    // The slice ends are joints, not creases; only interior folds are scored.
+    folds: sol.folds.filter(i => i > 0 && i < per),
+    per,
+  }
+}
+
 /** A rounded regular n-gon as a flat outline, normalised into the first quadrant. */
 export function roundedDisc(n, R, rc, arcSteps = 8) {
   const { pts } = roundedRing(n, R, rc, 0, -Math.PI / 2, rc > 1e-9 ? arcSteps : 0)

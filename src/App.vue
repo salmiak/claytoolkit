@@ -30,6 +30,7 @@
         v-model:cornerRBot="state.cornerRBot"
         v-model:roundTop="state.roundTop"
         v-model:roundBot="state.roundBot"
+        v-model:splitMantle="state.splitMantle"
         :geo="geo"
         :pdfLoading="pdfLoading"
         :svgHtml="svgHtml"
@@ -92,6 +93,7 @@ const DEFAULTS = {
   cornerRBot: 0,
   roundTop: true,
   roundBot: true,
+  splitMantle: false,
 }
 
 // A shape arriving by URL wins over the defaults, so shared and bookmarked
@@ -247,7 +249,10 @@ async function handleDownloadPdf() {
                       if (g.onePiece) {
                         const r = (g.cornerRBot > 0 || g.cornerRTop > 0)
                           ? `, r ${fmt(g.cornerRBot, u)}/${fmt(g.cornerRTop, u)} ${u}` : ''
-                        return `${corners}, ${t('computed.onePiece')}${r}${rot}`
+                        const how = g.split
+                          ? `${t('computed.perSide')} (×${g.nTop})`
+                          : t('computed.onePiece')
+                        return `${corners}, ${how}${r}${rot}`
                       }
                       return `${corners}, ${g.faceCount} ${t('svg.side')}, ` +
                              `${g.faces.length} ${t('computed.distinct').toLowerCase()}${rot}`

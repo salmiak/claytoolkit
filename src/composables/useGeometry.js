@@ -1,5 +1,5 @@
 import { facetedSolution, facetedPieces, edgeStrip, PIECE_GAP, isAligned } from './usePolyhedron.js'
-import { mantleSolution, mantleOutline, roundedDisc, maxCornerRadius } from './useRoundedMantle.js'
+import { mantleSolution, mantleOutline, sliceMantle, roundedDisc, maxCornerRadius } from './useRoundedMantle.js'
 
 const TAU = Math.PI * 2
 const n = x => Math.round(x * 100) / 100
@@ -146,11 +146,23 @@ function drawOnePiece(g, bb, track, unit, labels) {
     s += `<line class="fold" x1="${n(f.a.x)}" y1="${n(f.a.y)}" x2="${n(f.b.x)}" y2="${n(f.b.y)}"/>`
   })
 
+  // Split pieces carry one side's worth of each ring, so the edges are labelled
+  // with what this piece actually measures rather than the whole perimeter.
+  const share = g.split ? g.nTop : 1
   const mid = Math.floor(o.B.length / 2)
   s += `<text class="lbl-txt" x="${n(o.B[mid].x)}" y="${n(o.B[mid].y + 7)}" text-anchor="middle">` +
-       `${labels.bot} ${fmt(g.mantle.perimBot, unit)} ${unit}</text>`
+       `${labels.bot} ${fmt(g.mantle.perimBot / share, unit)} ${unit}</text>`
   s += `<text class="lbl-sub" x="${n(o.T[mid].x)}" y="${n(o.T[mid].y - 4)}" text-anchor="middle">` +
-       `${labels.top} ${fmt(g.mantle.perimTop, unit)} ${unit}</text>`
+       `${labels.top} ${fmt(g.mantle.perimTop / share, unit)} ${unit}</text>`
+  // The bottom label hangs below the outline; count it in, or whatever is
+  // placed beneath the shape next lands on top of it.
+  track({ x: o.B[mid].x, y: o.B[mid].y + 9 })
+  if (g.split) {
+    const cx = (o.B[0].x + o.B[o.B.length - 1].x) / 2
+    const cy = (o.B[mid].y + o.T[mid].y) / 2
+    s += `<text class="lbl-txt" x="${n(cx)}" y="${n(cy)}" text-anchor="middle">` +
+         `${labels.side} ×${g.nTop}</text>`
+  }
 
   s += drawRoundedDiscs(g, bb, track, unit, labels)
   return s
@@ -191,6 +203,9 @@ function ruler(bb, x0, labels, unit) {
   s += `<text class="ruler-txt" x="${n(x)}" y="${n(y + 4.5)}">0</text>`
   s += `<text class="ruler-txt" x="${n(x + L)}" y="${n(y + 4.5)}" text-anchor="end">${labels.control}</text>`
   bb.maxy = y + 6
+  // The ruler is a fixed 10 cm / 4 in, so on a template narrower than that it
+  // is the widest thing on the sheet and has to set the bound itself.
+  bb.maxx = Math.max(bb.maxx, x + L)
   return s
 }
 
@@ -201,7 +216,7 @@ function finalize(inner, bb, pad) {
   return { inner, vb: `${n(x)} ${n(y)} ${n(w)} ${n(h)}`, w: n(w), h: n(h) }
 }
 
-export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0, cornerRTop = 0, cornerRBot = 0 }) {
+export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, seamOn, seamW, discTop, discBot, nTop = 0, nBot = 0, rotDeg = 0, cornerRTop = 0, cornerRBot = 0, splitMantle = false }) {
   const f = MM_PER_UNIT[unit] || 1
   const sp = shrinkOn ? Math.min(99, Math.max(0, shrinkP || 0)) : 0
   const k = 100 / (100 - sp)
@@ -233,9 +248,15 @@ export function calcGeometry({ dTop, dBot, h: hVal, unit, shrinkOn, shrinkP, sea
     const mantle = mantleSolution({ n: nTop, rBotCirc: rBot, rTopCirc: rTop, h,
       cornerRBot: rcBot, cornerRTop: rcTop })
     if (mantle) {
-      const outline = mantleOutline(mantle)
+      // Split cuts the same unrolled mantle at its corner rulings instead of
+      // keeping it whole, so both options come from one solution and are
+      // guaranteed to describe the same pot. Small pieces are often easier to
+      // handle on the slab than one long strip.
+      const slice = splitMantle ? sliceMantle(mantle) : null
+      const outline = mantleOutline(slice || mantle)
       return {
         ok: true, faceted: true, onePiece: true, cyl: false,
+        split: !!slice, pieceCount: slice ? nTop : 1,
         mantle, outline, seam, rTop, rBot, h, nTop, nBot, rotDeg,
         cornerRBot: mantle.rcBot, cornerRTop: mantle.rcTop,
         cornerClamped: mantle.clampedBot || mantle.clampedTop,

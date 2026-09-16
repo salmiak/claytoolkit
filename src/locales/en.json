@@ -61,6 +61,7 @@
     "diaBot": "Diameter bottom",
     "pieces": "Mantle",
     "onePiece": "one piece",
+    "perSide": "one per side",
     "perimBot": "Perimeter bottom",
     "perimTop": "Perimeter top",
     "cornerR": "Corner radius",
@@ -144,7 +145,10 @@
     "noteFaceted": "Side length is the measurement across one face. The template shows each side once with how many to cut.",
     "corners": "Corners",
     "round": "Round",
-    "cornerRadius": "Corner radius"
+    "cornerRadius": "Corner radius",
+    "split": "One template per side",
+    "noteWhole": "The wall is one continuous piece, folded at the marked lines. Tick the box to cut it into one piece per side instead.",
+    "noteSplit": "The wall is cut as one piece per side, joined at the corners. Untick the box for a single continuous piece."
   },
   "size": {
     "banana": "banana {len}"

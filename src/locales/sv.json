@@ -61,6 +61,7 @@
     "diaBot": "Diameter botten",
     "pieces": "Mantel",
     "onePiece": "ett stycke",
+    "perSide": "en per sida",
     "perimBot": "Omkrets botten",
     "perimTop": "Omkrets topp",
     "cornerR": "Hörnradie",
@@ -144,7 +145,10 @@
     "noteFaceted": "Sidlängden är måttet på en sida. Mallen visar varje sida en gång med antal att klippa.",
     "corners": "Hörn",
     "round": "Rund",
-    "cornerRadius": "Hörnradie"
+    "cornerRadius": "Hörnradie",
+    "split": "En mall per sida",
+    "noteWhole": "Väggen är ett enda sammanhängande stycke som viks vid de markerade linjerna. Kryssa i rutan för att i stället dela den i en bit per sida.",
+    "noteSplit": "Väggen klipps som en bit per sida, som fogas ihop i hörnen. Avmarkera rutan för ett enda sammanhängande stycke."
   },
   "size": {
     "banana": "banan {len}"

@@ -20,6 +20,7 @@ const KEYS = [
   ['ct',  'cornerRTop', 'num'],
   ['cb',  'cornerRBot', 'num'],
   ['rot', 'rotDeg',     'num'],
+  ['sp',  'splitMantle', 'bool'],
   ['bd',  'discBot',    'bool'],
   ['td',  'discTop',    'bool'],
   // The two optional allowances read better as "present means on".
